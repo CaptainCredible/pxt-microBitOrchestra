@@ -5,6 +5,7 @@
  * think about clock vs radioticks (try to follow own clock, but if tick comes in and it was more than 1/2 step duration since last step then follow the tick)
  * make sure microbit has ID and setup outputs before sending any radio messages
  * link sendHardware to the hardware out for the receiver code
+ * changed
  */
 
 
