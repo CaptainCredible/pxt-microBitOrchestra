@@ -161,6 +161,8 @@ enum beepsOnOff {
 //%blockId="OrchestraInstrument" block="Orchestra Instruments"
 namespace OrchestraInstrument {
 
+
+
     /**
      * Setup your micro:bit as an Instrument
      * @param withNam a unique name that the Musicians can shout to get your Instruments attention
@@ -168,6 +170,8 @@ namespace OrchestraInstrument {
     //% blockId="MBORCH_joinAsInstrument" block="make an instrument with the name %withName"
     export function JoinOrchestraAsInstrument(withName: string): void {
         radio.setGroup(83)
+
+        isInstrument = true
         isInstrument = true
         InstrumentName = withName
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
