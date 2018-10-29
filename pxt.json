@@ -1,6 +1,6 @@
 {
     "name": "pxt-microbitorchestra",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "",
     "dependencies": {
         "core": "*",
@@ -9,7 +9,6 @@
     "files": [
         "README.md",
         "main.ts",
-        "Testproj.ts"
     ],
     "testFiles": [
         "test.ts"
