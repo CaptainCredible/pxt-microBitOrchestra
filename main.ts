@@ -172,6 +172,10 @@ namespace OrchestraInstrument {
         radio.setGroup(83)
 
         isInstrument = true
+        isInstrument = true
+
+        isInstrument = true
+
         InstrumentName = withName
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
 
