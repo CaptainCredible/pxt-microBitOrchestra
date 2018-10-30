@@ -170,8 +170,12 @@ namespace OrchestraInstrument {
     //% blockId="MBORCH_joinAsInstrument" block="make an instrument with the name %withName"
     export function JoinOrchestraAsInstrument(withName: string): void {
         radio.setGroup(83)
+<<<<<<< HEAD
         isInstrument = true
 <<<<<<< HEAD
+=======
+
+>>>>>>> parent of c00f2a7... changed
         isInstrument = true
 =======
         //
