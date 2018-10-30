@@ -10,6 +10,7 @@
         "README.md",
         "main.ts",
         "Testproj.ts"
+        "_locales/no/MBORCH-strings.json"
     ],
     "testFiles": [
         "test.ts"
