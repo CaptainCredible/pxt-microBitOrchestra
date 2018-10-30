@@ -174,11 +174,14 @@ namespace OrchestraInstrument {
 <<<<<<< HEAD
         isInstrument = true
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> parent of c00f2a7... changed
         isInstrument = true
 =======
+=======
+>>>>>>> parent of 7b4d0bc... Merge pull request #3 from CaptainCredible/pr-8f34ba82
         //
 >>>>>>> parent of 7b4d0bc... Merge pull request #3 from CaptainCredible/pr-8f34ba82
         InstrumentName = withName
