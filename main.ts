@@ -171,7 +171,11 @@ namespace OrchestraInstrument {
     export function JoinOrchestraAsInstrument(withName: string): void {
         radio.setGroup(83)
         isInstrument = true
+<<<<<<< HEAD
         isInstrument = true
+=======
+        //
+>>>>>>> parent of 7b4d0bc... Merge pull request #3 from CaptainCredible/pr-8f34ba82
         InstrumentName = withName
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
 
