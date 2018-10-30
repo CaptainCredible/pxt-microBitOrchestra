@@ -6,7 +6,7 @@
  * make sure microbit has ID and setup outputs before sending any radio messages
  * link sendHardware to the hardware out for the receiver code
  */
-
+//added a comment
 
 /**
  * Use this file to define custom functions and blocks.
