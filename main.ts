@@ -855,15 +855,15 @@ namespace OrchestraMusician {
                 handleExtClock(msgID, receivedData)
             }
             if (msgID == "mm") { //mm = musicianMutes
-                handleMusicianMutes(receivedData,true)
+                handleMusicianMutes(receivedData, true)
             } else if (msgID == "ms") { //musician solo
                 handleMusicianSolos(receivedData)
             } else if (msgID == "ma") { //mute all
-                handleMusicianMutes(1337,true) // this will mute all
+                handleMusicianMutes(1337, true) // this will mute all
             } else if (msgID == "uma") {//this will unmute all
                 handleMusicianSolos(1337)
             } else if (msgID == "mum") {//this will unmute one
-                handleMusicianMutes(receivedData,false)
+                handleMusicianMutes(receivedData, false)
             }
         })
         basic.showNumber(microBitID, 0)
