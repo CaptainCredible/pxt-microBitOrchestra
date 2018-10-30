@@ -5,7 +5,6 @@
  * think about clock vs radioticks (try to follow own clock, but if tick comes in and it was more than 1/2 step duration since last step then follow the tick)
  * make sure microbit has ID and setup outputs before sending any radio messages
  * link sendHardware to the hardware out for the receiver code
- * changed23
  */
 
 
@@ -13,7 +12,7 @@
  * Use this file to define custom functions and blocks.
  * Read more at https://makecode.microbit.org/blocks/custom
  */
-
+let musicianIsMuted = false
 let ABWasPressed = false
 let ABtimer = 0
 let numberOfOutputs = 128
@@ -129,6 +128,13 @@ enum channels {
     four = 3
 }
 
+enum mOrS {
+    //%block="mute"
+    mute = 0,
+    //%block="solo"
+    solo = 1
+}
+
 enum brightnesses {
     //%block="ow_my_eyes"
     ow_my_eyes = 255,
@@ -162,8 +168,6 @@ enum beepsOnOff {
 //%blockId="OrchestraInstrument" block="Orchestra Instruments"
 namespace OrchestraInstrument {
 
-
-
     /**
      * Setup your micro:bit as an Instrument
      * @param withNam a unique name that the Musicians can shout to get your Instruments attention
@@ -171,16 +175,7 @@ namespace OrchestraInstrument {
     //% blockId="MBORCH_joinAsInstrument" block="make an instrument with the name %withName"
     export function JoinOrchestraAsInstrument(withName: string): void {
         radio.setGroup(83)
-<<<<<<< HEAD
         isInstrument = true
-<<<<<<< HEAD
-=======
-
->>>>>>> parent of c00f2a7... changed
-        isInstrument = true
-=======
-        //
->>>>>>> parent of 7b4d0bc... Merge pull request #3 from CaptainCredible/pr-8f34ba82
         InstrumentName = withName
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
 
@@ -818,6 +813,31 @@ namespace OrchestraMusician {
     }
 
 
+    function handleMusicianMutes(musicianToMute: number, muteOrUnMute: boolean) {
+
+
+        if ((musicianToMute == microBitID) || (musicianToMute == 1337)) { //if we are being asked to mute
+            if (muteOrUnMute) {
+                musicianIsMuted = true
+                basic.showIcon(IconNames.No, 0)
+            } else {
+                musicianIsMuted = false
+                basic.clearScreen()
+            }
+
+        }
+    }
+
+    function handleMusicianSolos(musicianToSolo: number) {
+        if ((musicianToSolo == microBitID) || (musicianToSolo == 1337)) {
+            musicianIsMuted = false
+            basic.clearScreen()
+        } else {
+            musicianIsMuted = true
+            basic.showIcon(IconNames.No, 0)
+        }
+    }
+
 
 
 
@@ -834,8 +854,20 @@ namespace OrchestraMusician {
             if (extClock) {
                 handleExtClock(msgID, receivedData)
             }
+            if (msgID == "mm") { //mm = musicianMutes
+                handleMusicianMutes(receivedData,true)
+            } else if (msgID == "ms") { //musician solo
+                handleMusicianSolos(receivedData)
+            } else if (msgID == "ma") { //mute all
+                handleMusicianMutes(1337,true) // this will mute all
+            } else if (msgID == "uma") {//this will unmute all
+                handleMusicianSolos(1337)
+            } else if (msgID == "mum") {//this will unmute one
+                handleMusicianMutes(receivedData,false)
+            }
         })
         basic.showNumber(microBitID, 0)
+
     }
 
     /**
@@ -843,10 +875,15 @@ namespace OrchestraMusician {
      */
     //%blockId="MBORCH_sendNote" block="send note number %note| to %to"
     export function send(note: number, to: string) {
-        basic.pause(microBitID)
-        radio.setGroup(83) // change to the group where the Instruments are
-        radio.sendValue(to, note)
-        radio.setGroup(84) // change back to the group where tempo and clock ticks are
+        if (!musicianIsMuted) {
+            basic.pause(microBitID)
+            radio.setGroup(83) // change to the group where the Instruments are
+            radio.sendValue(to, note)
+            radio.setGroup(84) // change back to the group where tempo and clock ticks are
+        } else {
+            basic.showIcon(IconNames.No, 0)
+        }
+
     }
 
 
@@ -1124,6 +1161,56 @@ function handleMasterClockDisplay(thisStepIs: number, previousStepWas: number) {
 //%blockId="OrchestraConductor" block="Orchestra Conductors"
 namespace OrchestraConductor {
     /**
+     * mute a musician
+     */
+    //% block advanced=true
+    //% blockId="MBORCH_muteMusician" block="mute musician number %musicianNumber"
+    export function muteMusician(musicianNumber: number) {
+        radio.setGroup(84)
+        radio.sendValue("mm", musicianNumber)
+    }
+    /**
+     * unmute a musician
+     */
+    //% block advanced=true
+    //% blockId="MBORCH_unMuteMusician" block="unmute musician number %musicianNumber"
+    export function unMuteMusician(musicianNumber: number) {
+        radio.setGroup(84)
+        radio.sendValue("mum", musicianNumber)
+    }
+
+
+    /**
+ * solo a musician
+ */
+    //% block advanced=true
+    //% blockId="MBORCH_soloMusician" block="solo musician number %musicianNumber"
+    export function soloMusician(musicianNumber: number) {
+        radio.setGroup(84)
+        radio.sendValue("ms", musicianNumber)
+    }
+
+    /**
+* mute all musicians
+*/
+    //% block advanced=true
+    //% blockId="MBORCH_muteAllMusicians" block="mute all musicians"
+    export function muteAllMusicians() {
+        radio.setGroup(84)
+        radio.sendValue("mm", 1337)
+    }
+
+    /**
+* unmute all musicians
+*/
+    //% block advanced=true
+    //% blockId="MBORCH_unMuteAllMusicians" block="unmute all musicians "
+    export function unMuteAllMusicians() {
+        radio.setGroup(84)
+        radio.sendValue("ms", 1337) //it actually solos all musicians
+    }
+
+    /**
          * Retrigger the master clock back to 0
          */
     //% block advanced=true
@@ -1164,4 +1251,4 @@ namespace OrchestraConductor {
         })
         nextClockTickTime = input.runningTime() + stepLengthms
     }
-}
+} 
