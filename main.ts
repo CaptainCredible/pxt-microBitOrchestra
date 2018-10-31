@@ -1,4 +1,6 @@
 
+let timeSlotSpacing = 1  //spacing in milliseconds 
+
 /////
 /**
  * TODO
@@ -771,12 +773,13 @@ namespace OrchestraMusician {
 
 
     /**
-     * Setup a sequencer
+     * Setup an advanced sequencer
      * @param With how many steps
      * @param stepsAndUse internal or external clock
      */
-    //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|clock %Clock|tempo %Tempo|metronome clicks %Metronome|make sounds for the notes sent %blipsAndBloops"
-    export function makeASequencer(NumberOfSteps: numberofSteps, Clock: internalExternal, Tempo: number, blipsAndBloops: allowBlipsNoYes, Metronome: metronomeNoYes): void {
+    //% block advanced=true
+    //% blockId="MBORCH_makeAnAdvancedSequencer" block="make an advanced sequencer:|number of steps %NumberOfSteps|clock %Clock|tempo %Tempo|metronome clicks %Metronome|make sounds for the notes sent %blipsAndBloops"
+    export function makeAnAdvancedSequencer(NumberOfSteps: numberofSteps, Clock: internalExternal, Tempo: number, blipsAndBloops: allowBlipsNoYes, Metronome: metronomeNoYes): void {
         stepLengthms = 60000 / Tempo //find duration of 1bar
         stepLengthms = stepLengthms >> 1 //find duration of 1 2th
         if (Metronome == 1) {
@@ -810,6 +813,27 @@ namespace OrchestraMusician {
                 }
             }
             updatePage()
+        })
+    }
+
+    /**
+         * Setup a simple sequencer
+         * @param With how many steps
+         * @param stepsAndUse internal or external clock
+         */
+    //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
+    export function makeASequencer(NumberOfSteps: numberofSteps, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
+        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.external_clock, 120, allowBlipsNoYes.yes_please, metronomeNoYes.yes_please)
+        setUpTrackRouting(channels.one, name1, note1)
+        setUpTrackRouting(channels.two, name2, note2)
+        setUpTrackRouting(channels.three, name3, note3)
+        setUpTrackRouting(channels.four, name4, note4)
+        control.inBackground(function () {
+            while (true) {
+                basic.pause(20)
+                runSequencer()
+                //led.toggleAll()
+            }
         })
     }
 
@@ -877,7 +901,7 @@ namespace OrchestraMusician {
     //%blockId="MBORCH_sendNote" block="send note number %note| to %to"
     export function send(note: number, to: string) {
         if (!musicianIsMuted) {
-            basic.pause(microBitID)
+            basic.pause(microBitID * timeSlotSpacing) //safer pause
             radio.setGroup(83) // change to the group where the Instruments are
             radio.sendValue(to, note)
             radio.setGroup(84) // change back to the group where tempo and clock ticks are
@@ -1164,7 +1188,7 @@ namespace OrchestraConductor {
     /**
      * mute a musician
      */
-    //% block advanced=true
+
     //% blockId="MBORCH_muteMusician" block="mute musician number %musicianNumber"
     export function muteMusician(musicianNumber: number) {
         radio.setGroup(84)
