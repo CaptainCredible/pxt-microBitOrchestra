@@ -1,5 +1,6 @@
 
 let timeSlotSpacing = 1  //spacing in milliseconds 
+let buttonScanSpeed = 10
 
 /////
 /**
@@ -15,6 +16,8 @@ let timeSlotSpacing = 1  //spacing in milliseconds
  * Use this file to define custom functions and blocks.
  * Read more at https://makecode.microbit.org/blocks/custom
  */
+let oldButtA = false
+let oldButtB = false
 let musicianIsMuted = false
 let ABWasPressed = false
 let ABtimer = 0
@@ -323,15 +326,13 @@ namespace OrchestraInstrument {
 
 
 
-    /**
+	/**
      * Registers code to run when the Instrument receives a perticular note.
-     * @param event event description
-     * @param body code handler when event is triggered
      */
 
-    //%blockId = "MBORCH_onReceiveNote" 
-    //%block="when instrument receives note number|%event" icon="\uf152"
-    export function onInstrumentReceivedNote(note: number, body: Action) {
+
+    //%block="when instrument receives note number| %note"
+    export function onInstrumentReceivedNote(note: number, body: () => void) {
         onTimer[note] = input.runningTime()
         outputIsOn[note] = true
         control.onEvent(1337, note, body);
@@ -402,6 +403,8 @@ namespace OrchestraInstrument {
         }
     }
 
+
+
     /**
  * Make a Grouped Thumper, a device that listens for one specific radio message and triggers one actuator on P0
  * @param Name
@@ -466,6 +469,49 @@ namespace OrchestraInstrument {
 //% weight=100 color=#0fbc11 icon=""
 //%blockId="OrchestraMusician" block="Orchestra Musicians"
 namespace OrchestraMusician {
+
+    /**
+     * Registers code to run when button A is pushed
+     */
+
+
+    //%block="as soon as button A is pushed in"
+    export function onButtonAPressed(thing: Action) {
+        control.inBackground(function () {
+            while (true) {
+                if (input.buttonIsPressed(Button.A) && !aWasPressed) {
+                    control.raiseEvent(1983, 10)
+                    aWasPressed = true
+                } else if (!input.buttonIsPressed(Button.A)) {
+                    aWasPressed = false
+                }
+                basic.pause(buttonScanSpeed)
+            }
+        })
+        control.onEvent(1983, 10, thing);
+    }
+
+    /**
+     * Registers code to run when button A is pushed
+     */
+
+
+    //%block="as soon as button B is pushed in"
+    export function onButtonBPressed(thing: () => void) {
+        control.inBackground(function () {
+            while (true) {
+                if (input.buttonIsPressed(Button.B) && !bWasPressed) {
+                    control.raiseEvent(1984, 10)
+                    bWasPressed = true
+                } else if (!input.buttonIsPressed(Button.B)) {
+                    bWasPressed = false
+                }
+                basic.pause(buttonScanSpeed)
+            }
+        })
+        control.onEvent(1984, 10, thing);
+    }
+
 
     /**
      * inserts a pause to wait for tick
@@ -839,8 +885,6 @@ namespace OrchestraMusician {
 
 
     function handleMusicianMutes(musicianToMute: number, muteOrUnMute: boolean) {
-
-
         if ((musicianToMute == microBitID) || (musicianToMute == 1337)) { //if we are being asked to mute
             if (muteOrUnMute) {
                 musicianIsMuted = true
