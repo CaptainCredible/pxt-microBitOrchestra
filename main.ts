@@ -1,4 +1,4 @@
-//adde default value to advanced sequencer
+//made button detect purple
 
 let timeSlotSpacing = 1  //spacing in milliseconds 
 let buttonScanSpeed = 10
@@ -459,7 +459,8 @@ namespace OrchestraMusician {
      */
 
 
-    //%block="as soon as button A is pushed in" weight=80
+    //%block="as soon as button A is pushed" weight=80
+    //%color=#D400D4 weight=70
     export function onButtonAPressed(thing: Action) {
         control.inBackground(function () {
             while (true) {
@@ -476,11 +477,12 @@ namespace OrchestraMusician {
     }
 
     /**
-     * Registers code to run when button A is pushed
+     * Registers code to run when button B is pushed
      */
 
 
-    //%block="as soon as button B is pushed in" weight=70
+    //%block="as soon as button B is pushed" 
+    //%color=#D400D4 weight=70
     export function onButtonBPressed(thing: () => void) {
         control.inBackground(function () {
             while (true) {
@@ -863,7 +865,7 @@ namespace OrchestraMusician {
          */
     //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
     export function makeASequencer(NumberOfSteps: numberofSteps, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
-        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.external_clock, 120, metronomeNoYes.yes_please, allowBlipsNoYes.yes_please,)
+        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.external_clock, 120, metronomeNoYes.yes_please, allowBlipsNoYes.yes_please, )
         setUpTrackRouting(channels.one, name1, note1)
         setUpTrackRouting(channels.two, name2, note2)
         setUpTrackRouting(channels.three, name3, note3)
