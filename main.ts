@@ -1,23 +1,7 @@
-//pushedAgain
+//added more to advanced
+
 let timeSlotSpacing = 1  //spacing in milliseconds 
 let buttonScanSpeed = 10
-
-
-
-/////
-/**
- * TODO
- * think about clock vs radioticks (try to follow own clock, but if tick comes in and it was more than 1/2 step duration since last step then follow the tick)
- * make sure microbit has ID and setup outputs before sending any radio messages
- * link sendHardware to the hardware out for the receiver code
- */
-//removed a comment
-
-
-/**
- * Use this file to define custom functions and blocks.
- * Read more at https://makecode.microbit.org/blocks/custom
- */
 let oldButtA = false
 let oldButtB = false
 let musicianIsMuted = false
@@ -28,7 +12,6 @@ let outputMode = 0 // how to automatically handle outputs 0 = none, 1 = pins, 2 
 let outputIsOn: boolean[] = [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
 let onTimer: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 let pinOutputRoutings: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
 let InstrumentName = "Bob"
 let microBitID = 9876 //9876 is a secret number that lets our code know that this hasn't been set yet
 let isInstrument: boolean = false; //this is a flag to remind us wether we are a Instrument or a Musician
