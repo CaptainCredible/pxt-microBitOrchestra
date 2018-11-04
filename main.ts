@@ -1,4 +1,4 @@
-//added more to advanced
+//adde default value to advanced sequencer
 
 let timeSlotSpacing = 1  //spacing in milliseconds 
 let buttonScanSpeed = 10
@@ -396,8 +396,7 @@ namespace OrchestraInstrument {
  * @param Number
  */
     //% block advanced=true
-    //% blockId="MBORCH_groupedThumper" block="make a grouped thumper with the number %Number in the group %groupName"
-    //% weight=100
+    //% blockId="MBORCH_groupedThumper" block="make a grouped thumper with the number %Number in the group %groupName" weight=100
     export function makeAGroupedThumper(GroupName: string, Number: number): void {
         radio.setGroup(83)
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
@@ -460,7 +459,7 @@ namespace OrchestraMusician {
      */
 
 
-    //%block="as soon as button A is pushed in"
+    //%block="as soon as button A is pushed in" weight=80
     export function onButtonAPressed(thing: Action) {
         control.inBackground(function () {
             while (true) {
@@ -481,7 +480,7 @@ namespace OrchestraMusician {
      */
 
 
-    //%block="as soon as button B is pushed in"
+    //%block="as soon as button B is pushed in" weight=70
     export function onButtonBPressed(thing: () => void) {
         control.inBackground(function () {
             while (true) {
@@ -502,8 +501,7 @@ namespace OrchestraMusician {
      * inserts a pause to wait for tick
      */
 
-    //% blockId="MBORCH_waitForStep" block="wait for step number %step"
-    //% weight=100
+    //% blockId="MBORCH_waitForStep" block="wait for step number %step" weight=90
     export function waitFor(step: number) {
         extClock = 1
         waiting = true
@@ -780,11 +778,11 @@ namespace OrchestraMusician {
 
         if (allowBlipsAndBloops) {
             handleTones()
-           // serial.writeLine("AllowBlipsAndBloops")
+            // serial.writeLine("AllowBlipsAndBloops")
         }
-        if (metronome) {
+        if (metronome == true) {
             music.playTone(880, 2)
-           // serial.writeLine("metronome")
+            // serial.writeLine("metronome")
         }
 
         clearTriggerBuffer()
@@ -819,13 +817,12 @@ namespace OrchestraMusician {
      * @param stepsAndUse internal or external clock
      */
     //% block advanced=true
-    //% blockId="MBORCH_makeAnAdvancedSequencer" block="make an advanced sequencer:|number of steps %NumberOfSteps|clock %Clock|tempo %Tempo|metronome clicks %Metronome|make sounds for the notes sent %blipsAndBloops"
-    export function makeAnAdvancedSequencer(NumberOfSteps: numberofSteps, Clock: internalExternal, Tempo: number, blipsAndBloops: allowBlipsNoYes, Metronome: metronomeNoYes): void {
+    //% blockId="MBORCH_makeAnAdvancedSequencer" block="make a really advanced sequencer:|number of steps %NumberOfSteps clock %Clock tempo %Tempo metronome clicks %Metronome make sounds for the notes sent %blipsAndBloops" weight=100
+    //% Tempo.min=40 Tempo.max=400
+    //% Tempo.defl=120
+    export function makeAnAdvancedSequencer(NumberOfSteps: numberofSteps, Clock: internalExternal, Tempo: number = 120, Metronome: metronomeNoYes, blipsAndBloops: allowBlipsNoYes): void {
         stepLengthms = 60000 / Tempo //find duration of 1bar
         stepLengthms = stepLengthms >> 1 //find duration of 1 2th
-        
-        
-        
         if (Metronome == 1) {
             metronome = true
         } else {
@@ -836,7 +833,6 @@ namespace OrchestraMusician {
         } else {
             allowBlipsAndBloops = false
         }
-
         seqLength = NumberOfSteps
         lastStep = seqLength
         extClock = Clock
@@ -867,7 +863,7 @@ namespace OrchestraMusician {
          */
     //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
     export function makeASequencer(NumberOfSteps: numberofSteps, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
-        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.external_clock, 120, allowBlipsNoYes.yes_please, metronomeNoYes.yes_please)
+        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.external_clock, 120, metronomeNoYes.yes_please, allowBlipsNoYes.yes_please,)
         setUpTrackRouting(channels.one, name1, note1)
         setUpTrackRouting(channels.two, name2, note2)
         setUpTrackRouting(channels.three, name3, note3)
@@ -912,7 +908,7 @@ namespace OrchestraMusician {
      * Setup your micro:bit as a Musician
      * @param withId a unique ID so your Musician knows where to stand (and also so the Musicians don't talk at the same time)
      */
-    //% blockId="MBORCH_setUpAsMusician" block="join orchestra as musician with ID %withID"
+    //% blockId="MBORCH_setUpAsMusician" block="join orchestra as musician with ID %withID" weight=100
     export function setUpAsMusician(withID: number): void {
         radio.setGroup(84) // tempo and clock ticks will be sent on radio group 84
         microBitID = withID
@@ -940,7 +936,7 @@ namespace OrchestraMusician {
     /**
      * Send a command to the Microbit Orchestra
      */
-    //%blockId="MBORCH_sendNote" block="send note number %note| to %to"
+    //%blockId="MBORCH_sendNote" block="send note number %note| to %to" weight=60
     export function send(note: number, to: string) {
         if (!musicianIsMuted) {
             basic.pause(microBitID * timeSlotSpacing) //safer pause
@@ -1230,7 +1226,7 @@ namespace OrchestraConductor {
     /**
      * mute a musician
      */
-
+    //% block advanced=true
     //% blockId="MBORCH_muteMusician" block="mute musician number %musicianNumber"
     export function muteMusician(musicianNumber: number) {
         radio.setGroup(84)
@@ -1292,7 +1288,6 @@ namespace OrchestraConductor {
     /**
      * Setup this microbit as the master clock
      */
-    //% block advanced=true
     //% blockId="MBORCH_setupAsMAsterClock" block="Make master clock with| steps %numberOfSteps BPM %bpm subdivision of %subDivision Metronome beeps %MetronomeBeeps"
     export function setUpAsMasterClock(NumberOfSteps: numberofSteps, bpm: number, subDivision: subDiv, MetronomeBeeps: beepsOnOff) {
         radio.setGroup(84)
