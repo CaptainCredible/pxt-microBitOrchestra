@@ -541,7 +541,9 @@ namespace OrchestraMusician {
     /**
      * Setup the routing of the 4 sequencer tracks
      */
+    //% advanced=true
     //% blockId="MBORCH_setupTrackRouting" block="track %channels|sends name %Name| and number %note"
+    //%advanced = true 
     export function setUpTrackRouting(channel: channels, Name: string, note: number) {
         channelIsSetup[channel] = true
         channelOutNames[channel] = Name
@@ -551,6 +553,7 @@ namespace OrchestraMusician {
     /**
      * Run the sequencer clock 
      */
+    //% advanced=true
     //% blockId="MBORCH_runSequencer" block="run sequencer and check buttons"
     export function runSequencer() {
         if (sequencerExists) {
@@ -673,15 +676,19 @@ namespace OrchestraMusician {
         music.setTempo(masterTempo)
         if (triggerBuffer[0]) {
             music.playTone(523, music.beat(BeatFraction.Sixteenth))
+            //serial.writeLine("0")
         }
         if (triggerBuffer[1]) {
             music.playTone(392, music.beat(BeatFraction.Sixteenth))
+            //serial.writeLine("1")
         }
         if (triggerBuffer[2]) {
             music.playTone(330, music.beat(BeatFraction.Sixteenth))
+            //serial.writeLine("2")
         }
         if (triggerBuffer[3]) {
             music.playTone(262, music.beat(BeatFraction.Sixteenth))
+            //serial.writeLine("3")
         }
     }
 
@@ -787,11 +794,14 @@ namespace OrchestraMusician {
             triggerBuffer[3] = true
         }
         sendTriggersOut()
+
         if (allowBlipsAndBloops) {
             handleTones()
+           // serial.writeLine("AllowBlipsAndBloops")
         }
         if (metronome) {
             music.playTone(880, 2)
+           // serial.writeLine("metronome")
         }
 
         clearTriggerBuffer()
@@ -830,6 +840,9 @@ namespace OrchestraMusician {
     export function makeAnAdvancedSequencer(NumberOfSteps: numberofSteps, Clock: internalExternal, Tempo: number, blipsAndBloops: allowBlipsNoYes, Metronome: metronomeNoYes): void {
         stepLengthms = 60000 / Tempo //find duration of 1bar
         stepLengthms = stepLengthms >> 1 //find duration of 1 2th
+        
+        
+        
         if (Metronome == 1) {
             metronome = true
         } else {
