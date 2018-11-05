@@ -656,22 +656,24 @@ namespace OrchestraMusician {
     }
     ///
     function handleTones() {
-        music.setTempo(masterTempo)
-        if (triggerBuffer[0]) {
-            music.playTone(523, music.beat(BeatFraction.Sixteenth))
-            //serial.writeLine("0")
-        }
-        if (triggerBuffer[1]) {
-            music.playTone(392, music.beat(BeatFraction.Sixteenth))
-            //serial.writeLine("1")
-        }
-        if (triggerBuffer[2]) {
-            music.playTone(330, music.beat(BeatFraction.Sixteenth))
-            //serial.writeLine("2")
-        }
-        if (triggerBuffer[3]) {
-            music.playTone(262, music.beat(BeatFraction.Sixteenth))
-            //serial.writeLine("3")
+        if (!musicianIsMuted) {
+            music.setTempo(masterTempo)
+            if (triggerBuffer[0]) {
+                music.playTone(523, music.beat(BeatFraction.Sixteenth))
+                //serial.writeLine("0")
+            }
+            if (triggerBuffer[1]) {
+                music.playTone(392, music.beat(BeatFraction.Sixteenth))
+                //serial.writeLine("1")
+            }
+            if (triggerBuffer[2]) {
+                music.playTone(330, music.beat(BeatFraction.Sixteenth))
+                //serial.writeLine("2")
+            }
+            if (triggerBuffer[3]) {
+                music.playTone(262, music.beat(BeatFraction.Sixteenth))
+                //serial.writeLine("3")
+            }
         }
     }
 
@@ -780,11 +782,11 @@ namespace OrchestraMusician {
 
         if (allowBlipsAndBloops) {
             handleTones()
-           // serial.writeLine("AllowBlipsAndBloops")
+            // serial.writeLine("AllowBlipsAndBloops")
         }
         if (metronome) {
             music.playTone(880, 2)
-           // serial.writeLine("metronome")
+            // serial.writeLine("metronome")
         }
 
         clearTriggerBuffer()
@@ -823,9 +825,9 @@ namespace OrchestraMusician {
     export function makeAnAdvancedSequencer(NumberOfSteps: numberofSteps, Clock: internalExternal, Tempo: number, blipsAndBloops: allowBlipsNoYes, Metronome: metronomeNoYes): void {
         stepLengthms = 60000 / Tempo //find duration of 1bar
         stepLengthms = stepLengthms >> 1 //find duration of 1 2th
-        
-        
-        
+
+
+
         if (Metronome == 1) {
             metronome = true
         } else {
@@ -865,8 +867,9 @@ namespace OrchestraMusician {
          * @param With how many steps
          * @param stepsAndUse internal or external clock
          */
-    //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
-    export function makeASequencer(NumberOfSteps: numberofSteps, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
+    //% blockId="MBORCH_makeASequencer" block="make a simple sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
+    //% NumberOfSteps.defl=8
+    export function makeASequencer(NumberOfSteps: numberofSteps = numberofSteps.eight, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.external_clock, 120, allowBlipsNoYes.yes_please, metronomeNoYes.yes_please)
         setUpTrackRouting(channels.one, name1, note1)
         setUpTrackRouting(channels.two, name2, note2)
@@ -890,6 +893,9 @@ namespace OrchestraMusician {
             } else {
                 musicianIsMuted = false
                 basic.clearScreen()
+                if (sequencerExists) {
+                    updatePage()
+                }
             }
 
         }
@@ -899,6 +905,9 @@ namespace OrchestraMusician {
         if ((musicianToSolo == microBitID) || (musicianToSolo == 1337)) {
             musicianIsMuted = false
             basic.clearScreen()
+            if (sequencerExists) {
+                updatePage()
+            }
         } else {
             musicianIsMuted = true
             basic.showIcon(IconNames.No, 0)
@@ -960,6 +969,14 @@ namespace OrchestraMusician {
 
     let pageOffset = 0
     function updatePage() {
+        if (musicianIsMuted) {
+            basic.showIcon(IconNames.No)
+        } else {
+            actuallyUpdatePage()
+        }
+    }
+
+    function actuallyUpdatePage() {
         pageOffset = part * 4
         for (let j = 0; j <= 4 - 1; j++) {
             if (seqA[j + pageOffset]) {
