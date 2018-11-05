@@ -656,22 +656,24 @@ namespace OrchestraMusician {
     }
     ///
     function handleTones() {
-        music.setTempo(masterTempo)
-        if (triggerBuffer[0]) {
-            music.playTone(523, music.beat(BeatFraction.Sixteenth))
-            //serial.writeLine("0")
-        }
-        if (triggerBuffer[1]) {
-            music.playTone(392, music.beat(BeatFraction.Sixteenth))
-            //serial.writeLine("1")
-        }
-        if (triggerBuffer[2]) {
-            music.playTone(330, music.beat(BeatFraction.Sixteenth))
-            //serial.writeLine("2")
-        }
-        if (triggerBuffer[3]) {
-            music.playTone(262, music.beat(BeatFraction.Sixteenth))
-            //serial.writeLine("3")
+        if (!musicianIsMuted) {
+            music.setTempo(masterTempo)
+            if (triggerBuffer[0]) {
+                music.playTone(523, music.beat(BeatFraction.Sixteenth))
+                //serial.writeLine("0")
+            }
+            if (triggerBuffer[1]) {
+                music.playTone(392, music.beat(BeatFraction.Sixteenth))
+                //serial.writeLine("1")
+            }
+            if (triggerBuffer[2]) {
+                music.playTone(330, music.beat(BeatFraction.Sixteenth))
+                //serial.writeLine("2")
+            }
+            if (triggerBuffer[3]) {
+                music.playTone(262, music.beat(BeatFraction.Sixteenth))
+                //serial.writeLine("3")
+            }
         }
     }
 
@@ -825,6 +827,7 @@ namespace OrchestraMusician {
     export function makeAnAdvancedSequencer(NumberOfSteps: numberofSteps, Clock: internalExternal, Tempo: number = 120, Metronome: metronomeNoYes, blipsAndBloops: allowBlipsNoYes): void {
         stepLengthms = 60000 / Tempo //find duration of 1bar
         stepLengthms = stepLengthms >> 1 //find duration of 1 2th
+
         if (Metronome == 1) {
             metronome = true
         } else {
@@ -888,6 +891,9 @@ namespace OrchestraMusician {
             } else {
                 musicianIsMuted = false
                 basic.clearScreen()
+                if (sequencerExists) {
+                    updatePage()
+                }
             }
 
         }
@@ -897,6 +903,9 @@ namespace OrchestraMusician {
         if ((musicianToSolo == microBitID) || (musicianToSolo == 1337)) {
             musicianIsMuted = false
             basic.clearScreen()
+            if (sequencerExists) {
+                updatePage()
+            }
         } else {
             musicianIsMuted = true
             basic.showIcon(IconNames.No, 0)
@@ -958,6 +967,14 @@ namespace OrchestraMusician {
 
     let pageOffset = 0
     function updatePage() {
+        if (musicianIsMuted) {
+            basic.showIcon(IconNames.No)
+        } else {
+            actuallyUpdatePage()
+        }
+    }
+
+    function actuallyUpdatePage() {
         pageOffset = part * 4
         for (let j = 0; j <= 4 - 1; j++) {
             if (seqA[j + pageOffset]) {
