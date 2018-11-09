@@ -172,17 +172,17 @@ namespace OrchestraInstrument {
      * Setup your micro:bit as an Instrument
      * @param withNam a unique name that the Musicians can shout to get your Instruments attention
      */
-    //% blockId="MBORCH_joinAsInstrument" block="make an instrument with the name %withName"
+    //% blockId="MBORCH_joinAsInstrument" block="make an amazing instrument with the name %withName"
     export function JoinOrchestraAsInstrument(withName: string): void {
         radio.setGroup(83)
         isInstrument = true
         InstrumentName = withName
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
-
+            led.toggle(2, 2)
             // here we need to distinguish between normal and Poly
             if (receivedName == InstrumentName) {
                 if (outputMode == 0) { // no automated trigger handling
-                    control.raiseEvent(1337, value)
+                    control.raiseEvent(1337, value+1) //we need to avoid zero, zero is catch all
                 } else {
                     handleInstrumentOutputMode(value) //decide what to do
                 }
@@ -190,12 +190,12 @@ namespace OrchestraInstrument {
             else if (receivedName == InstrumentName + "P") {
                 handleInstrumentPoly(value) //decide what to do
             }
-            control.inBackground(() => {
-                while (true) {
-                    handleInstrumentOffs()
-                    basic.pause(10)
-                }
-            })
+        })
+        control.inBackground(() => {
+            while (true) {
+                handleInstrumentOffs()
+                basic.pause(10)
+            }
         })
     }
 
@@ -327,9 +327,11 @@ namespace OrchestraInstrument {
 
     //%block="when instrument receives note number| %note"
     export function onInstrumentReceivedNote(note: number, body: () => void) {
-        onTimer[note] = input.runningTime()
-        outputIsOn[note] = true
-        control.onEvent(1337, note, body);
+        outputMode = 0
+        //onTimer[note] = input.runningTime()
+        //outputIsOn[note] = true
+        //led.toggleAll()
+        control.onEvent(1337, note+1, body);
     }
 
 
@@ -561,19 +563,18 @@ namespace OrchestraMusician {
     let selectLedGoingUp = false
     function pulseSelectLed() {
         if (selectLedGoingUp) {
-            selectLedBrightness+=10
+            selectLedBrightness += 10
             if (selectLedBrightness > 253) {
                 selectLedGoingUp = false
             }
         } else {
-            selectLedBrightness-=10
+            selectLedBrightness -= 10
             if (selectLedBrightness < 10) {
                 selectLedGoingUp = true
             }
         }
-        led.plotBrightness(4, channelSelect,selectLedBrightness)
+        led.plotBrightness(4, channelSelect, selectLedBrightness)
     }
-
     function changeSelectedChannel(by: number) {
         led.unplot(4, channelSelect)
         channelSelect = channelSelect + by
