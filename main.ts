@@ -1,4 +1,4 @@
-//made button detect purple
+
 
 let timeSlotSpacing = 1  //spacing in milliseconds 
 let buttonScanSpeed = 10
@@ -15,8 +15,8 @@ let pinOutputRoutings: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 let InstrumentName = "Bob"
 let microBitID = 9876 //9876 is a secret number that lets our code know that this hasn't been set yet
 let isInstrument: boolean = false; //this is a flag to remind us wether we are a Instrument or a Musician
-let extClock = 0
-
+let extClock = 0 //0 is int, 1 is ext, 2 is int in sim, 3 is int until clock message received
+let auto = true
 //sequencer stuff:
 let masterTempo = 120
 let sequencerExists = false;
@@ -53,6 +53,11 @@ let nextClockTickTime = 0
 ///
 ////
 ////
+let runningInSimulator = true
+if (pins.digitalReadPin(DigitalPin.P20)) {
+    runningInSimulator = false
+}
+
 
 /// receiver stuff
 //let onTimer = 0
@@ -65,7 +70,11 @@ enum internalExternal {
     //%block="external_clock"
     external_clock = 1,
     //%block="internal_clock"
-    internal_clock = 0
+    internal_clock = 0,
+    //%block="autorun_in_simulator"
+    autorun_in_simulator = 2,
+    //%block="internal_until_clock_received"
+    internal_until_clock_received = 3
 }
 
 enum allowBlipsNoYes {
@@ -543,10 +552,27 @@ namespace OrchestraMusician {
             if (extClock == 0) {
                 clockTimer()
             }
+            pulseSelectLed()
             checkButts() //replace this with discrete functions
         }
     }
 
+    let selectLedBrightness = 255
+    let selectLedGoingUp = false
+    function pulseSelectLed() {
+        if (selectLedGoingUp) {
+            selectLedBrightness+=10
+            if (selectLedBrightness > 253) {
+                selectLedGoingUp = false
+            }
+        } else {
+            selectLedBrightness-=10
+            if (selectLedBrightness < 10) {
+                selectLedGoingUp = true
+            }
+        }
+        led.plotBrightness(4, channelSelect,selectLedBrightness)
+    }
 
     function changeSelectedChannel(by: number) {
         led.unplot(4, channelSelect)
@@ -827,7 +853,6 @@ namespace OrchestraMusician {
     export function makeAnAdvancedSequencer(NumberOfSteps: numberofSteps, Clock: internalExternal, Tempo: number = 120, Metronome: metronomeNoYes, blipsAndBloops: allowBlipsNoYes): void {
         stepLengthms = 60000 / Tempo //find duration of 1bar
         stepLengthms = stepLengthms >> 1 //find duration of 1 2th
-
         if (Metronome == 1) {
             metronome = true
         } else {
@@ -840,7 +865,21 @@ namespace OrchestraMusician {
         }
         seqLength = NumberOfSteps
         lastStep = seqLength
-        extClock = Clock
+        if (Clock == 3) {
+            Clock = 0
+            auto = true
+        } else if (Clock == 2) { //if only run in simulator
+            if (runningInSimulator) {
+                extClock = 0
+            } else {
+                extClock = 1
+            }
+        } else {
+            extClock = Clock
+            auto = false
+        }
+
+
         if (extClock) {
             masterTempo = 480
         }
@@ -866,9 +905,10 @@ namespace OrchestraMusician {
          * @param With how many steps
          * @param stepsAndUse internal or external clock
          */
-    //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
+    //% blockId="MBORCH_makeASimpleSeequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
     export function makeASequencer(NumberOfSteps: numberofSteps, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
-        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.external_clock, 120, metronomeNoYes.yes_please, allowBlipsNoYes.yes_please, )
+        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.yes_please, allowBlipsNoYes.yes_please)
+
         setUpTrackRouting(channels.one, name1, note1)
         setUpTrackRouting(channels.two, name2, note2)
         setUpTrackRouting(channels.three, name3, note3)
@@ -877,7 +917,6 @@ namespace OrchestraMusician {
             while (true) {
                 basic.pause(20)
                 runSequencer()
-                //led.toggleAll()
             }
         })
     }
@@ -925,6 +964,11 @@ namespace OrchestraMusician {
         microBitID = withID
         isInstrument = false
         radio.onDataPacketReceived(({ receivedString: msgID, receivedNumber: receivedData }) => {
+            if (auto) {
+                extClock = 1
+                auto = false
+            }
+
             if (extClock) {
                 handleExtClock(msgID, receivedData)
             }
@@ -973,7 +1017,6 @@ namespace OrchestraMusician {
             actuallyUpdatePage()
         }
     }
-
     function actuallyUpdatePage() {
         pageOffset = part * 4
         for (let j = 0; j <= 4 - 1; j++) {
@@ -1013,7 +1056,7 @@ namespace OrchestraMusician {
             lastStep = currentStep
             lastClockTickTime = input.runningTime()
             currentStep += 1
-            led.toggle(4, channelSelect)
+            //led.toggle(4, channelSelect)
             currentStep = currentStep % seqLength
             //handleLastStep()
             handleStep()
