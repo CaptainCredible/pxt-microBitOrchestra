@@ -182,7 +182,7 @@ namespace OrchestraInstrument {
             // here we need to distinguish between normal and Poly
             if (receivedName == InstrumentName) {
                 if (outputMode == 0) { // no automated trigger handling
-                    control.raiseEvent(1337, value+1) //we need to avoid zero, zero is catch all
+                    control.raiseEvent(1337, value + 1) //we need to avoid zero, zero is catch all
                 } else {
                     handleInstrumentOutputMode(value) //decide what to do
                 }
@@ -331,7 +331,7 @@ namespace OrchestraInstrument {
         //onTimer[note] = input.runningTime()
         //outputIsOn[note] = true
         //led.toggleAll()
-        control.onEvent(1337, note+1, body);
+        control.onEvent(1337, note + 1, body);
     }
 
 
@@ -455,6 +455,22 @@ namespace OrchestraInstrument {
         basic.pause(200)
         basic.clearScreen()
     }
+    export function playBassDrumThroughSpeaker() {
+        let l = 200
+        for (let i = 0; i <= l - 1; i++) {
+            music.playTone(l * 2 - i * 2, 0)
+        }
+        music.playTone(440, 1)
+    }
+    export function playSnareDrumThroughSpeaker() {
+        let m = 200
+        for (let i0 = 0; i0 < m; i0++) {
+            music.playTone(Math.randomRange(1000, 4000), 0)
+        }
+        music.playTone(440, 1)
+    }
+
+
 }
 
 
