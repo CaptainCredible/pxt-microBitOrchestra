@@ -575,7 +575,6 @@ namespace OrchestraMusician {
         }
         led.plotBrightness(4, channelSelect, selectLedBrightness)
     }
-
     function changeSelectedChannel(by: number) {
         led.unplot(4, channelSelect)
         channelSelect = channelSelect + by
