@@ -455,15 +455,23 @@ namespace OrchestraInstrument {
         basic.pause(200)
         basic.clearScreen()
     }
-    export function playBassDrumThroughSpeaker() {
-        let l = 200
+
+    //%block="playBassDrumThroughSpeaker %duration"
+    //%duration.defl=200
+    //%advanced=true
+    export function playBassDrumThroughSpeaker(duration: number) {
+        let l = duration
         for (let i = 0; i <= l - 1; i++) {
             music.playTone(l * 2 - i * 2, 0)
         }
         music.playTone(440, 1)
     }
-    export function playSnareDrumThroughSpeaker() {
-        let m = 200
+
+    //%block="playSnareDrumThroughSpeaker %duration"
+    //%duration.defl=200
+    //%advanced=true
+    export function playSnareDrumThroughSpeaker(duration: number) {
+        let m = duration
         for (let i0 = 0; i0 < m; i0++) {
             music.playTone(Math.randomRange(1000, 4000), 0)
         }
