@@ -1,6 +1,8 @@
+//  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//  !!!!!!!!!! changed timeslot timing to waitmicros NEEDS TESTING !!!!!!!!!
+//  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
-let timeSlotSpacing = 1  //spacing in milliseconds 
+let timeSlotSpacing = 1 * 1000  //spacing in milliseconds  add 1000 to use micros
 let buttonScanSpeed = 10
 let oldButtA = false
 let oldButtB = false
@@ -1019,7 +1021,8 @@ namespace OrchestraMusician {
     //%blockId="MBORCH_sendNote" block="send note number %note| to %to" weight=60
     export function send(note: number, to: string) {
         if (!musicianIsMuted) {
-            basic.pause(microBitID * timeSlotSpacing) //safer pause
+            //basic.pause(microBitID * timeSlotSpacing) //safer pause
+            control.waitMicros(microBitID * timeSlotSpacing) // blocking pause but better
             radio.setGroup(83) // change to the group where the Instruments are
             radio.sendValue(to, note)
             radio.setGroup(84) // change back to the group where tempo and clock ticks are
