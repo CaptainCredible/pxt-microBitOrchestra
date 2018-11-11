@@ -399,6 +399,14 @@ namespace OrchestraInstrument {
             basic.showIcon(IconNames.No, 1)
 
         }
+        control.inBackground(function () {
+            while(true){
+                led.plot(2,2)
+                basic.pause(50)
+                led.unplot(2, 2)
+                basic.pause(1950)
+            }
+        })
     }
 
 
@@ -932,10 +940,30 @@ namespace OrchestraMusician {
          * @param With how many steps
          * @param stepsAndUse internal or external clock
          */
+    //% blockId="MBORCH_makeASimpleSeequencer" block="make a simple sequencer:|my musician ID is: $musID number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
+    export function makeASimpleSequencer(MusID: number, NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, note4: number): void {
+        OrchestraMusician.setUpAsMusician(MusID)
+        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBlipsNoYes.yes_please)
+        setUpTrackRouting(channels.one, masterName, note1)
+        setUpTrackRouting(channels.two, masterName, note2)
+        setUpTrackRouting(channels.three, masterName, note3)
+        setUpTrackRouting(channels.four, masterName, note4)
+        control.inBackground(function () {
+            while (true) {
+                basic.pause(20)
+                runSequencer()
+            }
+        })
+    }
+
+    /**
+         * Setup a simple sequencer
+         * @param With how many steps
+         * @param stepsAndUse internal or external clock
+         */
     //% blockId="MBORCH_makeASimpleSeequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
     export function makeASequencer(NumberOfSteps: numberofSteps, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.yes_please, allowBlipsNoYes.yes_please)
-
         setUpTrackRouting(channels.one, name1, note1)
         setUpTrackRouting(channels.two, name2, note2)
         setUpTrackRouting(channels.three, name3, note3)
@@ -1023,13 +1051,15 @@ namespace OrchestraMusician {
         if (!musicianIsMuted) {
             //basic.pause(microBitID * timeSlotSpacing) //safer pause
             control.waitMicros(microBitID * timeSlotSpacing) // blocking pause but better
-            radio.setGroup(83) // change to the group where the Instruments are
-            radio.sendValue(to, note)
-            radio.setGroup(84) // change back to the group where tempo and clock ticks are
+            if (!runningInSimulator) {
+                radio.setGroup(83) // change to the group where the Instruments are
+                radio.sendValue(to, note)
+                radio.setGroup(84) // change back to the group where tempo and clock ticks are
+            }
+
         } else {
             basic.showIcon(IconNames.No, 0)
         }
-
     }
 
 
