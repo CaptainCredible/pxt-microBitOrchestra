@@ -2,7 +2,7 @@
 //  !!!!!!!!!! changed timeslot timing to waitmicros NEEDS TESTING !!!!!!!!!
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-let timeSlotSpacing = 1 * 1000  //spacing in milliseconds  add 1000 to use micros
+let timeSlotSpacing = 1 * 1500  //spacing in milliseconds  add 1000 to use micros
 let buttonScanSpeed = 10
 let oldButtA = false
 let oldButtB = false
@@ -940,7 +940,7 @@ namespace OrchestraMusician {
          * @param With how many steps
          * @param stepsAndUse internal or external clock
          */
-    //% blockId="MBORCH_makeASimpleSeequencer" block="make a simple sequencer:|my musician ID is: $musID number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
+    //% blockId="MBORCH_makeASimplerSequencer" block="make a simple sequencer:|my musician ID is: $MusID number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the fourth sound I want to control is $note4"
     export function makeASimpleSequencer(MusID: number, NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, note4: number): void {
         OrchestraMusician.setUpAsMusician(MusID)
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBlipsNoYes.yes_please)
@@ -957,11 +957,11 @@ namespace OrchestraMusician {
     }
 
     /**
-         * Setup a simple sequencer
+         * Setup a sequencer
          * @param With how many steps
          * @param stepsAndUse internal or external clock
          */
-    //% blockId="MBORCH_makeASimpleSeequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
+    //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
     export function makeASequencer(NumberOfSteps: numberofSteps, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.yes_please, allowBlipsNoYes.yes_please)
         setUpTrackRouting(channels.one, name1, note1)
