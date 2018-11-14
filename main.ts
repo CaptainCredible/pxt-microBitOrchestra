@@ -1,7 +1,7 @@
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //  !!!!!!!!!! changed timeslot timing to waitmicros NEEDS TESTING !!!!!!!!!
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+let timeSlotMode = 0
 let timeSlotSpacing = 1 * 1500  //spacing in milliseconds  add 1000 to use micros
 let buttonScanSpeed = 10
 let oldButtA = false
@@ -66,7 +66,18 @@ if (pins.digitalReadPin(DigitalPin.P20)) {
 
 
 
-
+enum timeSlotModes {
+    //%block="legacy"
+    legacy = 0,
+    //%block="allow to send 1 adressed int"
+    allow_1_int = 1,
+    //%block="allow 2 addressed ints"
+    allow_2_int = 2,
+    //%block="allow 3 addressed ints"
+    allow_3_int = 3,
+    //%block="allow 4 adressed ints"
+    allow_4_int = 4
+}
 
 enum internalExternal {
     //%block="external_clock"
@@ -325,8 +336,6 @@ namespace OrchestraInstrument {
 	/**
      * Registers code to run when the Instrument receives a perticular note.
      */
-
-
     //%block="when instrument receives note number| %note"
     export function onInstrumentReceivedNote(note: number, body: () => void) {
         outputMode = 0
@@ -336,7 +345,29 @@ namespace OrchestraInstrument {
         control.onEvent(1337, note + 1, body);
     }
 
-
+    function handleThumperMutes(muteInt: number) {
+        /*
+        Bob 00000001
+        Tim 00000010
+        Ted 00000100
+        Pat 00001000
+        Cat 00010000 (also thumper)
+        Dad 00100000
+        Mum 01000000
+        Zim 10000000
+        */
+        if (muteInt & 0b00010000) {
+            if (!thumperIsMuted) {
+                basic.showIcon(IconNames.No, 0)
+            }
+            thumperIsMuted = true
+        } else {
+            if (thumperIsMuted) {
+                basic.clearScreen()
+            }
+            thumperIsMuted = false
+        }
+    }
 
     /**
      * Make a Thumper, a device that listens for one specific radio message and triggers one actuator on P0
@@ -345,70 +376,65 @@ namespace OrchestraInstrument {
      */
     //% blockId="MBORCH_Thumper" block="make a thumper with the name %Name"
     export function makeAThumper(Name: string): void {
-
-
         radio.setGroup(83)
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
-            if (receivedName == "m") {
-                /*
-                Bob 00000001
-                Tim 00000010
-                Ted 00000100
-                Pat 00001000
-                Cat 00010000 (also thumper)
-                Dad 00100000
-                Mum 01000000
-                Zim 10000000
-                */
-
-
-                if (value & 0b00010000) {
-                    thumperIsMuted = true
-                    basic.showIcon(IconNames.No, 1)
-                    //basic.pause(1000)
-                } else {
-                    thumperIsMuted = false
-                    basic.clearScreen()
-                }
-            }
             if (!thumperIsMuted) {
                 if (receivedName == Name) {
-                    pins.digitalWritePin(DigitalPin.P0, 1)
-                    led.toggle(2, 2)
-                    basic.pause(2)
-                    pins.digitalWritePin(DigitalPin.P0, 0)
-                    led.toggle(2, 2)
+                    actuateThumper()
                 } else if (receivedName == Name + "P") {
-                    //let polyPMatch = 1 << (Number)
-                    //if (polyPMatch & value) {
-                    pins.digitalWritePin(DigitalPin.P0, 1)
-                    led.toggle(2, 3)
-                    basic.pause(5)
-                    pins.digitalWritePin(DigitalPin.P0, 0)
-                    led.toggle(2, 3)
-                    //}
+                    actuateThumper()
                 }
             }
 
+            if (receivedName == "m") {
+                handleThumperMutes(value)
+            }
         })
         basic.showString(Name, 40)
-        //basic.showNumber(Number, 40)
         basic.pause(200)
         basic.clearScreen()
+        pulseThumperNose()
         if (thumperIsMuted) {
             basic.showIcon(IconNames.No, 1)
-
         }
+    }
+
+    function actuateThumper() {
+        pins.digitalWritePin(DigitalPin.P0, 1)
+        led.toggle(0, 4)
+        led.toggle(1, 4)
+        led.toggle(2, 4)
+        led.toggle(3, 4)
+        led.toggle(4, 4)
+        basic.pause(12)
+        pins.digitalWritePin(DigitalPin.P0, 0)
+        led.toggle(0, 4)
+        led.toggle(1, 4)
+        led.toggle(2, 4)
+        led.toggle(3, 4)
+        led.toggle(4, 4)
+    }
+
+    function pulseThumperNose() {
         control.inBackground(function () {
-            while(true){
-                led.plot(2,2)
-                basic.pause(50)
-                led.unplot(2, 2)
-                basic.pause(1950)
+            while (true) {
+                if (!thumperIsMuted) {
+                    led.plot(1, 2)
+                    led.plot(2, 2)
+                    led.plot(3, 2)
+                    led.plot(2, 3)
+                    basic.pause(50)
+                    led.unplot(1, 2)
+                    led.unplot(2, 2)
+                    led.unplot(3, 2)
+                    led.unplot(2, 3)
+                    basic.pause(1950)
+                } else {
+                    basic.pause(100)
+                }
             }
         })
     }
-
 
 
     /**
@@ -422,48 +448,28 @@ namespace OrchestraInstrument {
         radio.setGroup(83)
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
             if (receivedName == "m") {
-                /*
-                Bob 00000001
-                Tim 00000010
-                Ted 00000100
-                Pat 00001000
-                Cat 00010000 (also thumper)
-                Dad 00100000
-                Mum 01000000
-                Zim 10000000
-                */
-                if (value & 0b00010000) {
-                    thumperIsMuted = true
-                    basic.showIcon(IconNames.No, 1)
-                } else {
-                    thumperIsMuted = false
-                    basic.clearScreen()
-                }
+                handleThumperMutes(value)
             }
+
             if (!thumperIsMuted) {
+                if (value == -1 && GroupName == receivedName) { // this meens catch all
+                    actuateThumper()
+                }
                 if (receivedName == GroupName && value == Number) {
-                    pins.digitalWritePin(DigitalPin.P0, 1)
-                    led.toggle(2, 2)
-                    basic.pause(2)
-                    pins.digitalWritePin(DigitalPin.P0, 0)
-                    led.toggle(2, 2)
+                    actuateThumper()
                 } else if (receivedName == GroupName + "P") {
                     let polyPMatch = 1 << (Number)
                     if (polyPMatch & value) {
-                        pins.digitalWritePin(DigitalPin.P0, 1)
-                        led.toggle(2, 3)
-                        basic.pause(5)
-                        pins.digitalWritePin(DigitalPin.P0, 0)
-                        led.toggle(2, 3)
+                        actuateThumper()
                     }
                 }
-
             }
         })
         basic.showString(GroupName, 40)
         basic.showNumber(Number, 40)
         basic.pause(200)
         basic.clearScreen()
+        pulseThumperNose()
     }
 
     //%block="playBassDrumThroughSpeaker %duration"
@@ -702,6 +708,7 @@ namespace OrchestraMusician {
 
 
     function sendTriggersOut() {  //read the buffer and send any notes that need to be sent
+        //<if(timeSlotMode == 0)
         for (let m = 0; m <= 4 - 1; m++) {
             if (triggerBuffer[m]) {
                 triggerChannel(m)
