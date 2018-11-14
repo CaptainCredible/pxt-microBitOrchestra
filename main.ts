@@ -3,7 +3,8 @@
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // updated but not pushed
 
-
+let replaceLastPolyWithThumper = false
+let numberOfMusicians = 16 //default number of musicians
 let radioSendWindow = 750
 let polySend = false //if we are sending all messages to one instrument
 let polyInstrumentName = "Bob"
@@ -76,8 +77,8 @@ if (pins.digitalReadPin(DigitalPin.P20)) {
 enum timeSlotModes {
     //%block="legacy"
     legacy = 0,
-    //%block="allow to send 1 adressed int"
-    allow_1_int = 1,
+    //%block="stagger 1 int at a time"
+    stagger = 1,
     //%block="allow 2 addressed ints"
     allow_2_int = 2,
     //%block="allow 3 addressed ints"
@@ -450,7 +451,7 @@ namespace OrchestraInstrument {
  * @param Number
  */
     //% block advanced=true
-    //% blockId="MBORCH_groupedThumper" block="make a grouped thumper with the number %Number in the group %groupName" weight=100
+    //% blockId="MBORCH_groupedThumper" block="make a grouped thumper with the number $Number in the group $GroupName" weight=100
     export function makeAGroupedThumper(GroupName: string, Number: number): void {
         radio.setGroup(83)
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
@@ -702,30 +703,38 @@ namespace OrchestraMusician {
 
 
 
-
-
-
-
-
     function sendTriggersOut() {  //read the buffer and send any notes that need to be sent
-        if (timeSlotMode == 0) {
-            legacySendTriggersOut()
-        } else {
-            if (polySend) {
-                for (let m = 0; m <= 4 - 1; m++) {
-                    if (triggerBuffer[m]) {
-                        let noteToPoly = 0b0000000000000001 << channelOutNotes[m] // find corresponding bit
-                        polySendBuffer = polySendBuffer | noteToPoly //set correstponding bit
-                    }
-                    waitForTimeSlot()
-                    send(polySendBuffer, polyInstrumentName + "P")         //sends the buffer polyPhonically
-                    polySendBuffer = 0
-                }
-            } else {
-                control.waitMicros(microBitID * timeSlotMode * radioSendWindow) // wait as long as the slot mode will allow
-
+        if (polySend) {
+            let scanLength = 4
+            if(replaceLastPolyWithThumper){
+                scanLength = 3
             }
-
+            for (let m = 0; m < scanLength; m++) {
+                if (triggerBuffer[m]) {
+                    let noteToPoly = 0b0000000000000001 << channelOutNotes[m] // find corresponding bit
+                    polySendBuffer = polySendBuffer | noteToPoly //set correstponding bit
+                }
+            }
+            if(replaceLastPolyWithThumper && triggerBuffer[3]){
+                basic.pause(numberOfMusicians)
+                send(channelOutNotes[3],channelOutNames[3])
+            }
+            if(polySendBuffer > 0){
+                waitForTimeSlot()
+                send(polySendBuffer, polyInstrumentName + "P")         //sends the buffer polyPhonically
+                //led.toggleAll()
+            }
+            polySendBuffer = 0  //clear the buffer
+        } else if (timeSlotMode == 0) {
+            legacySendTriggersOut()
+        } else if (timeSlotMode == 1) {
+            waitForTimeSlot()
+            for (let m = 0; m < 4; m++) {
+                if (triggerBuffer[m]) {   //if we find a note to send
+                    triggerChannel(m)     // send it
+                    basic.pause(numberOfMusicians); //wait til all musicians have sent their first note before sending second note  
+                }
+            }
         }
     }
 
@@ -973,6 +982,39 @@ namespace OrchestraMusician {
         })
     }
 
+/**
+ * set number of musicians in orchestra
+ * 
+ */
+//%blockId="setNumberOfMusicians" block="set number of musicians to $thisMany" advanced=true thisMany.defl=16
+export function setNumberOfMusicians(thisMany: number){
+    numberOfMusicians = thisMany
+}
+
+    /**
+         * Setup a simple sequencer with a thumper
+         * @param With how many steps
+         * @param stepsAndUse internal or external clock
+         */
+    //% blockId="MBORCH_makeASimplerSequencerWThumper" block="make a simple sequencer with a thumper:|my musician ID is: $MusID number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the name of the thumper i want to control with the bottom row is $thumperName"
+    export function makeASimpleSequencerWithThumper(MusID: number, NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, thumperName: string): void {
+        polySend = true  //make it send polyphonic ints
+        replaceLastPolyWithThumper = true        
+        OrchestraMusician.setUpAsMusician(MusID)
+        polyInstrumentName = masterName
+        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBlipsNoYes.yes_please)
+        setUpTrackRouting(channels.one, masterName, note1)
+        setUpTrackRouting(channels.two, masterName, note2)
+        setUpTrackRouting(channels.three, masterName, note3)
+        setUpTrackRouting(channels.four, thumperName, MusID)
+        control.inBackground(function () {
+            while (true) {
+                basic.pause(20)
+                runSequencer()
+            }
+        })
+    }
+
     /**
          * Setup a simple sequencer
          * @param With how many steps
@@ -980,7 +1022,9 @@ namespace OrchestraMusician {
          */
     //% blockId="MBORCH_makeASimplerSequencer" block="make a simple sequencer:|my musician ID is: $MusID number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the fourth sound I want to control is $note4"
     export function makeASimpleSequencer(MusID: number, NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, note4: number): void {
+        polySend = true  //make it send polyphonic ints        
         OrchestraMusician.setUpAsMusician(MusID)
+        polyInstrumentName = masterName
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBlipsNoYes.yes_please)
         setUpTrackRouting(channels.one, masterName, note1)
         setUpTrackRouting(channels.two, masterName, note2)
@@ -993,6 +1037,7 @@ namespace OrchestraMusician {
             }
         })
     }
+
 
     /**
          * Setup a sequencer
