@@ -3,6 +3,7 @@
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // updated but not pushed
 
+
 let replaceLastPolyWithThumper = false
 let numberOfMusicians = 16 //default number of musicians
 let radioSendWindow = 750
@@ -388,9 +389,14 @@ namespace OrchestraInstrument {
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
             if (!thumperIsMuted) {
                 if (receivedName == Name) {
-                    actuateThumper()
+                    actuateThumper(value)
                 } else if (receivedName == Name + "P") {
-                    actuateThumper()
+                    let myBitMask = 1
+                    for (let i = 0; i < 4; i++) {
+                        if (value & (myBitMask << i)) {
+                            actuateThumper(i)
+                        }
+                    }
                 }
             }
 
@@ -407,14 +413,59 @@ namespace OrchestraInstrument {
         }
     }
 
-    function actuateThumper() {
-        pins.digitalWritePin(DigitalPin.P0, 1)
+    function actuateThumper(activityType: number) {
         led.toggle(0, 4)
         led.toggle(1, 4)
         led.toggle(2, 4)
         led.toggle(3, 4)
         led.toggle(4, 4)
-        basic.pause(12)
+
+        switch (activityType) {
+
+            case 1: {
+
+                pins.digitalWritePin(DigitalPin.P0, 1)
+                control.waitMicros(10000);
+                pins.digitalWritePin(DigitalPin.P0, 0)
+                control.waitMicros(10000);
+                pins.digitalWritePin(DigitalPin.P0, 1)
+                control.waitMicros(10000);
+                pins.digitalWritePin(DigitalPin.P0, 0)
+                control.waitMicros(10000);
+
+
+                break;
+            }
+
+            case 2: {
+                for (let i = 0; i < 7; i++) {
+                    pins.digitalWritePin(DigitalPin.P0, 1)
+                    control.waitMicros(5000)
+                    pins.digitalWritePin(DigitalPin.P0, 0)
+                    control.waitMicros(6000)
+                }
+                break;
+            }
+            case 3: {
+                for (let i = 0; i <= 6 - 1; i++) {
+                    pins.digitalWritePin(DigitalPin.P0, 1)
+                    basic.pause(5)
+                    //control.waitMicros(4000)
+                    pins.digitalWritePin(DigitalPin.P0, 0)
+                    basic.pause((i + 1) * 5)
+                    //control.waitMicros((i + 1) * 5000)
+                }
+                break;
+            }
+
+            default: {
+                pins.digitalWritePin(DigitalPin.P0, 1)
+                basic.pause(5)
+                pins.digitalWritePin(DigitalPin.P0, 0)
+                break;
+            }
+        }
+
         pins.digitalWritePin(DigitalPin.P0, 0)
         led.toggle(0, 4)
         led.toggle(1, 4)
@@ -461,14 +512,14 @@ namespace OrchestraInstrument {
 
             if (!thumperIsMuted) {
                 if (value == -1 && GroupName == receivedName) { // this meens catch all
-                    actuateThumper()
+                    actuateThumper(0)
                 }
                 if (receivedName == GroupName && value == Number) {
-                    actuateThumper()
+                    actuateThumper(0)
                 } else if (receivedName == GroupName + "P") {
                     let polyPMatch = 1 << (Number)
                     if (polyPMatch & value) {
-                        actuateThumper()
+                        actuateThumper(0)
                     }
                 }
             }
@@ -512,6 +563,8 @@ namespace OrchestraInstrument {
 //% weight=100 color=#0fbc11 icon=""
 //%blockId="OrchestraMusician" block="Orchestra Musicians"
 namespace OrchestraMusician {
+
+
 
     /**
      * Registers code to run when button A is pushed
@@ -570,6 +623,7 @@ namespace OrchestraMusician {
             basic.pause(1)
             if (currentStep == step)
                 waiting = false
+            waitForTimeSlot()
         }
     }
 
@@ -706,7 +760,7 @@ namespace OrchestraMusician {
     function sendTriggersOut() {  //read the buffer and send any notes that need to be sent
         if (polySend) {
             let scanLength = 4
-            if(replaceLastPolyWithThumper){
+            if (replaceLastPolyWithThumper) {
                 scanLength = 3
             }
             for (let m = 0; m < scanLength; m++) {
@@ -715,7 +769,7 @@ namespace OrchestraMusician {
                     polySendBuffer = polySendBuffer | noteToPoly //set correstponding bit
                 }
             }
-            if(polySendBuffer > 0){
+            if (polySendBuffer > 0) {
                 waitForTimeSlot()
                 send(polySendBuffer, polyInstrumentName + "P")         //sends the buffer polyPhonically
                 //led.toggleAll()
@@ -933,6 +987,9 @@ namespace OrchestraMusician {
     //% Tempo.min=40 Tempo.max=400
     //% Tempo.defl=120
     export function makeAnAdvancedSequencer(NumberOfSteps: numberofSteps, Clock: internalExternal, Tempo: number = 120, Metronome: metronomeNoYes, blipsAndBloops: allowBlipsNoYes): void {
+        if (microBitID == 9876) {
+            basic.showString("ERROR, SET ID")
+        }
         stepLengthms = 60000 / Tempo //find duration of 1bar
         stepLengthms = stepLengthms >> 1 //find duration of 1 2th
         if (Metronome == 1) {
@@ -982,14 +1039,14 @@ namespace OrchestraMusician {
         })
     }
 
-/**
- * set number of musicians in orchestra
- * 
- */
-//%blockId="setNumberOfMusicians" block="set number of musicians to $thisMany" advanced=true thisMany.defl=16
-export function setNumberOfMusicians(thisMany: number){
-    numberOfMusicians = thisMany
-}
+    /**
+     * set number of musicians in orchestra
+     * 
+     */
+    //%blockId="setNumberOfMusicians" block="set number of musicians to $thisMany" advanced=true thisMany.defl=16
+    export function setNumberOfMusicians(thisMany: number) {
+        numberOfMusicians = thisMany
+    }
 
     /**
          * Setup a simple sequencer with a thumper
@@ -999,7 +1056,7 @@ export function setNumberOfMusicians(thisMany: number){
     //% blockId="MBORCH_makeASimplerSequencerWThumper" block="make a simple sequencer with a thumper:|my musician ID is: $MusID number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the name of the thumper i want to control with the bottom row is $thumperName"
     export function makeASimpleSequencerWithThumper(MusID: number, NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, thumperName: string): void {
         polySend = true  //make it send polyphonic ints
-        replaceLastPolyWithThumper = true        
+        replaceLastPolyWithThumper = true
         OrchestraMusician.setUpAsMusician(MusID)
         polyInstrumentName = masterName
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBlipsNoYes.yes_please)
