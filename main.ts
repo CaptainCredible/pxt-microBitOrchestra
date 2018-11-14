@@ -1,6 +1,13 @@
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //  !!!!!!!!!! changed timeslot timing to waitmicros NEEDS TESTING !!!!!!!!!
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// updated but not pushed
+
+
+let radioSendWindow = 750
+let polySend = false //if we are sending all messages to one instrument
+let polyInstrumentName = "Bob"
+let polySendBuffer = 0
 let timeSlotMode = 0
 let timeSlotSpacing = 1 * 1500  //spacing in milliseconds  add 1000 to use micros
 let buttonScanSpeed = 10
@@ -695,25 +702,49 @@ namespace OrchestraMusician {
 
 
 
-    function triggerChannel(channelToTrigger: number) {
-        if (channelIsSetup[channelToTrigger]) {
-            //basic.pause(microBitID) //wait for this microbits timeslot to avoid radios talking ontop of eachother
-            send(channelOutNotes[channelToTrigger], channelOutNames[channelToTrigger])
-        }
-    }
-
 
 
 
 
 
     function sendTriggersOut() {  //read the buffer and send any notes that need to be sent
-        //<if(timeSlotMode == 0)
+        if (timeSlotMode == 0) {
+            legacySendTriggersOut()
+        } else {
+            if (polySend) {
+                for (let m = 0; m <= 4 - 1; m++) {
+                    if (triggerBuffer[m]) {
+                        let noteToPoly = 0b0000000000000001 << channelOutNotes[m] // find corresponding bit
+                        polySendBuffer = polySendBuffer | noteToPoly //set correstponding bit
+                    }
+                    waitForTimeSlot()
+                    send(polySendBuffer, polyInstrumentName + "P")         //sends the buffer polyPhonically
+                    polySendBuffer = 0
+                }
+            } else {
+                control.waitMicros(microBitID * timeSlotMode * radioSendWindow) // wait as long as the slot mode will allow
+
+            }
+
+        }
+    }
+
+    function waitForTimeSlot() {
+        control.waitMicros(microBitID * timeSlotMode * radioSendWindow) // wait as long as the slot mode will allow
+    }
+
+    function legacySendTriggersOut() {
         for (let m = 0; m <= 4 - 1; m++) {
             if (triggerBuffer[m]) {
+                waitForTimeSlot()
                 triggerChannel(m)
-                //radio.sendValue("on", m + deviceID * 4)
             }
+        }
+    }
+
+    function triggerChannel(channelToTrigger: number) {
+        if (channelIsSetup[channelToTrigger]) {
+            send(channelOutNotes[channelToTrigger], channelOutNames[channelToTrigger])
         }
     }
 
@@ -1057,7 +1088,6 @@ namespace OrchestraMusician {
     export function send(note: number, to: string) {
         if (!musicianIsMuted) {
             //basic.pause(microBitID * timeSlotSpacing) //safer pause
-            control.waitMicros(microBitID * timeSlotSpacing) // blocking pause but better
             if (!runningInSimulator) {
                 radio.setGroup(83) // change to the group where the Instruments are
                 radio.sendValue(to, note)
