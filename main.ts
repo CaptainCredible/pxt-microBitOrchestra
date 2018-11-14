@@ -392,7 +392,7 @@ namespace OrchestraInstrument {
                     actuateThumper(value)
                 } else if (receivedName == Name + "P") {
                     let myBitMask = 1
-                    for (let i = 0; i < 4; i++) {
+                    for (let i = 0; i < 16; i++) {
                         if (value & (myBitMask << i)) {
                             actuateThumper(i)
                         }
