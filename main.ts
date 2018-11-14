@@ -715,16 +715,16 @@ namespace OrchestraMusician {
                     polySendBuffer = polySendBuffer | noteToPoly //set correstponding bit
                 }
             }
-            if(replaceLastPolyWithThumper && triggerBuffer[3]){
-                basic.pause(numberOfMusicians)
-                send(channelOutNotes[3],channelOutNames[3])
-            }
             if(polySendBuffer > 0){
                 waitForTimeSlot()
                 send(polySendBuffer, polyInstrumentName + "P")         //sends the buffer polyPhonically
                 //led.toggleAll()
             }
             polySendBuffer = 0  //clear the buffer
+            if (replaceLastPolyWithThumper && triggerBuffer[3]) {
+                basic.pause(numberOfMusicians)
+                send(channelOutNotes[3], channelOutNames[3])
+            }
         } else if (timeSlotMode == 0) {
             legacySendTriggersOut()
         } else if (timeSlotMode == 1) {
