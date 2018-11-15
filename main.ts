@@ -1,9 +1,10 @@
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //  !!!!!!!!!! changed timeslot timing to waitmicros NEEDS TESTING !!!!!!!!!
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// updated but not pushed
+// updated and pushed
 
-
+let conductorPassword = 1983
+let enteredPassword = 0
 let replaceLastPolyWithThumper = false
 let numberOfMusicians = 16 //default number of musicians
 let radioSendWindow = 750
@@ -194,7 +195,7 @@ namespace OrchestraInstrument {
      * Setup your micro:bit as an Instrument
      * @param withNam a unique name that the Musicians can shout to get your Instruments attention
      */
-    //% blockId="MBORCH_joinAsInstrument" block="make an amazing instrument with the name %withName"
+    //% blockId="MBORCH_joinAsInstrument" block="make an instrument with the name $withName"
     export function JoinOrchestraAsInstrument(withName: string): void {
         radio.setGroup(83)
         isInstrument = true
@@ -221,7 +222,7 @@ namespace OrchestraInstrument {
         })
     }
 
-    //%blockId="MBORCH_redirectNotesToPulsePins" block="use incoming notes 1-8 to pulse pins one %one|two %two|three %three|four %four|five %five|six %six|seven %seven|eight %eight"
+    //%blockId="MBORCH_redirectNotesToPulsePins" block="use incoming notes 1-8 to pulse pins|one %one|two %two|three %three|four %four|five %five|six %six|seven %seven|eight %eight" advanced=true
     export function redirectNotesToPulsePins(one: DigitalPin, two: DigitalPin, three: DigitalPin, four: DigitalPin, five: DigitalPin, six: DigitalPin, seven: DigitalPin, eight: DigitalPin): void {
         outputMode = 1
         pinOutputRoutings[0] = one
@@ -531,7 +532,7 @@ namespace OrchestraInstrument {
         pulseThumperNose()
     }
 
-    //%block="playBassDrumThroughSpeaker %duration"
+    //%block="play bass drum through speaker.| length = %duration"
     //%duration.defl=200
     //%advanced=true
     export function playBassDrumThroughSpeaker(duration: number) {
@@ -542,7 +543,7 @@ namespace OrchestraInstrument {
         music.playTone(440, 1)
     }
 
-    //%block="playSnareDrumThroughSpeaker %duration"
+    //%block="play snare drum through speaker.| length = %duration"
     //%duration.defl=200
     //%advanced=true
     export function playSnareDrumThroughSpeaker(duration: number) {
@@ -564,13 +565,20 @@ namespace OrchestraInstrument {
 //%blockId="OrchestraMusician" block="Orchestra Musicians"
 namespace OrchestraMusician {
 
+    /**
+     * Sets the system for making sure 2 micro:bits don't send at the same time
+     */
 
+    //%blockId="MBORCH_timeSlotType" block="set timeslot mode to $Type" weight = 0 
+    //%advanced=true
+    export function sertTimeSlotMode(Type: timeSlotModes) {
+        timeSlotMode = Type
+    }
 
     /**
      * Registers code to run when button A is pushed
      */
-
-
+    //
     //%block="as soon as button A is pushed" weight=80
     //%color=#D400D4 weight=70
     export function onButtonAPressed(thing: Action) {
@@ -615,7 +623,8 @@ namespace OrchestraMusician {
      * inserts a pause to wait for tick
      */
 
-    //% blockId="MBORCH_waitForStep" block="wait for step number %step" weight=90
+    //% blockId="MBORCH_waitForStep" block="wait for step number %step" 
+    //% weight=50
     export function waitFor(step: number) {
         extClock = 1
         waiting = true
@@ -639,7 +648,8 @@ namespace OrchestraMusician {
      */
     //% advanced=true
     //% blockId="MBORCH_setupTrackRouting" block="track %channels|sends name %Name| and number %note"
-    //%advanced = true 
+    //%advanced = true
+    //% weight=600
     export function setUpTrackRouting(channel: channels, Name: string, note: number) {
         channelIsSetup[channel] = true
         channelOutNames[channel] = Name
@@ -650,7 +660,8 @@ namespace OrchestraMusician {
      * Run the sequencer clock 
      */
     //% advanced=true
-    //% blockId="MBORCH_runSequencer" block="run sequencer and check buttons"
+    //% blockId="MBORCH_runSequencer" block="run sequencer and check buttons" 
+    //% weight=500
     export function runSequencer() {
         if (sequencerExists) {
             if (extClock == 0) {
@@ -983,7 +994,8 @@ namespace OrchestraMusician {
      * @param stepsAndUse internal or external clock
      */
     //% block advanced=true
-    //% blockId="MBORCH_makeAnAdvancedSequencer" block="make a really advanced sequencer:|number of steps %NumberOfSteps clock %Clock tempo %Tempo metronome clicks %Metronome make sounds for the notes sent %blipsAndBloops" weight=100
+    //% blockId="MBORCH_makeAnAdvancedSequencer" block="make a really advanced sequencer:|number of steps %NumberOfSteps clock %Clock tempo %Tempo metronome clicks %Metronome make sounds for the notes sent %blipsAndBloops" 
+    //% weight=800
     //% Tempo.min=40 Tempo.max=400
     //% Tempo.defl=120
     export function makeAnAdvancedSequencer(NumberOfSteps: numberofSteps, Clock: internalExternal, Tempo: number = 120, Metronome: metronomeNoYes, blipsAndBloops: allowBlipsNoYes): void {
@@ -1053,17 +1065,18 @@ namespace OrchestraMusician {
          * @param With how many steps
          * @param stepsAndUse internal or external clock
          */
-    //% blockId="MBORCH_makeASimplerSequencerWThumper" block="make a simple sequencer with a thumper:|my musician ID is: $MusID number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the name of the thumper i want to control with the bottom row is $thumperName"
-    export function makeASimpleSequencerWithThumper(MusID: number, NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, thumperName: string): void {
+    //% blockId="MBORCH_makeASimplerSequencerWThumper" block="make a simple sequencer with a thumper:| number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the name of the thumper i want to control with the bottom row is $thumperName"
+    //% weight=10
+    export function makeASimpleSequencerWithThumper(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, thumperName: string): void {
         polySend = true  //make it send polyphonic ints
         replaceLastPolyWithThumper = true
-        OrchestraMusician.setUpAsMusician(MusID)
+        //OrchestraMusician.setUpAsMusician(MusID)
         polyInstrumentName = masterName
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBlipsNoYes.yes_please)
         setUpTrackRouting(channels.one, masterName, note1)
         setUpTrackRouting(channels.two, masterName, note2)
         setUpTrackRouting(channels.three, masterName, note3)
-        setUpTrackRouting(channels.four, thumperName, MusID)
+        setUpTrackRouting(channels.four, thumperName, 0)
         control.inBackground(function () {
             while (true) {
                 basic.pause(20)
@@ -1077,10 +1090,9 @@ namespace OrchestraMusician {
          * @param With how many steps
          * @param stepsAndUse internal or external clock
          */
-    //% blockId="MBORCH_makeASimplerSequencer" block="make a simple sequencer:|my musician ID is: $MusID number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the fourth sound I want to control is $note4"
-    export function makeASimpleSequencer(MusID: number, NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, note4: number): void {
+    //% blockId="MBORCH_makeASimplerSequencer" block="make a simple sequencer:|number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the fourth sound I want to control is $note4"
+    export function makeASimpleSequencer(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, note4: number): void {
         polySend = true  //make it send polyphonic ints        
-        OrchestraMusician.setUpAsMusician(MusID)
         polyInstrumentName = masterName
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBlipsNoYes.yes_please)
         setUpTrackRouting(channels.one, masterName, note1)
@@ -1101,8 +1113,9 @@ namespace OrchestraMusician {
          * @param With how many steps
          * @param stepsAndUse internal or external clock
          */
-    //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4"
+    //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4" advanced=true weight=900
     export function makeASequencer(NumberOfSteps: numberofSteps, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
+        timeSlotMode = timeSlotModes.stagger
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.yes_please, allowBlipsNoYes.yes_please)
         setUpTrackRouting(channels.one, name1, note1)
         setUpTrackRouting(channels.two, name2, note2)
@@ -1475,6 +1488,7 @@ function handleMasterClockDisplay(thisStepIs: number, previousStepWas: number) {
 
 }
 
+let conductorUnlocked = false
 
 /**
  * Custom blocks
@@ -1483,13 +1497,31 @@ function handleMasterClockDisplay(thisStepIs: number, previousStepWas: number) {
 //%blockId="OrchestraConductor" block="Orchestra Conductors"
 namespace OrchestraConductor {
     /**
+     * unlock conductor blocks
+     */
+    //% blockId="MBORCH_conductorPassword" block="unlock conductor blocks with password = ´$password" advanced=true
+    export function enterConductorPassword(password: number) {
+        enteredPassword = password
+        if (password == conductorPassword) {
+            conductorUnlocked = true
+        } else {
+            basic.showString("wrong password")
+        }
+    }
+
+    /**
      * mute a musician
      */
     //% block advanced=true
-    //% blockId="MBORCH_muteMusician" block="mute musician number %musicianNumber"
+    //% blockId="MBORCH_muteMusician" block="mute musician number %musicianNumber" advanced=true
     export function muteMusician(musicianNumber: number) {
-        radio.setGroup(84)
-        radio.sendValue("mm", musicianNumber)
+        if (conductorUnlocked) {
+            radio.setGroup(84)
+            radio.sendValue("mm", musicianNumber)
+        } else {
+            basic.showString("wrong password")
+        }
+
     }
     /**
      * unmute a musician
@@ -1497,8 +1529,12 @@ namespace OrchestraConductor {
     //% block advanced=true
     //% blockId="MBORCH_unMuteMusician" block="unmute musician number %musicianNumber"
     export function unMuteMusician(musicianNumber: number) {
-        radio.setGroup(84)
-        radio.sendValue("mum", musicianNumber)
+        if (conductorUnlocked) {
+            radio.setGroup(84)
+            radio.sendValue("mum", musicianNumber)
+        } else {
+            basic.showString("wrong password")
+        }
     }
 
 
@@ -1507,9 +1543,14 @@ namespace OrchestraConductor {
  */
     //% block advanced=true
     //% blockId="MBORCH_soloMusician" block="solo musician number %musicianNumber"
+
     export function soloMusician(musicianNumber: number) {
-        radio.setGroup(84)
-        radio.sendValue("ms", musicianNumber)
+        if (conductorUnlocked) {
+            radio.setGroup(84)
+            radio.sendValue("ms", musicianNumber)
+        } else {
+            basic.showString("wrong password")
+        }
     }
 
     /**
@@ -1518,8 +1559,12 @@ namespace OrchestraConductor {
     //% block advanced=true
     //% blockId="MBORCH_muteAllMusicians" block="mute all musicians"
     export function muteAllMusicians() {
-        radio.setGroup(84)
-        radio.sendValue("mm", 1337)
+        if (conductorUnlocked) {
+            radio.setGroup(84)
+            radio.sendValue("mm", 1337)
+        } else {
+            basic.showString("wrong password")
+        }
     }
 
     /**
@@ -1528,8 +1573,12 @@ namespace OrchestraConductor {
     //% block advanced=true
     //% blockId="MBORCH_unMuteAllMusicians" block="unmute all musicians "
     export function unMuteAllMusicians() {
-        radio.setGroup(84)
-        radio.sendValue("ms", 1337) //it actually solos all musicians
+        if (conductorUnlocked) {
+            radio.setGroup(84)
+            radio.sendValue("ms", 1337) //it actually solos all musicians
+        } else {
+            basic.showString("wrong password")
+        }
     }
 
     /**
@@ -1538,38 +1587,46 @@ namespace OrchestraConductor {
     //% block advanced=true
     //% blockId="MBORCH_resetMasterSync" "block=reset the master clock back to zero"
     export function resetMasterClockSync() {
-        lastClockTickTime = 0
-        masterClockStep = -1
-        runMasterClock()
+        if (conductorUnlocked) {
+            lastClockTickTime = 0
+            masterClockStep = -1
+            runMasterClock()
+        } else {
+            basic.showString("wrong password")
+        }
     }
 
 
     /**
      * Setup this microbit as the master clock
      */
-    //% blockId="MBORCH_setupAsMAsterClock" block="Make master clock with| steps %numberOfSteps BPM %bpm subdivision of %subDivision Metronome beeps %MetronomeBeeps"
+    //% blockId="MBORCH_setupAsMAsterClock" block="Make master clock with| steps $NumberOfSteps BPM $bpm subdivision of $subDivision Metronome beeps $MetronomeBeeps|(this block is locked by password)" advanced=true bpm.defl=60 bpm.min=10 bpm.max=400
     export function setUpAsMasterClock(NumberOfSteps: numberofSteps, bpm: number, subDivision: subDiv, MetronomeBeeps: beepsOnOff) {
-        radio.setGroup(84)
-        extClock = 0
-        masterTempo = bpm
-        stepLengthms = 60000 / bpm
-        stepLengthms = stepLengthms >> subDivision
-        isMasterClock = true
-        seqLength = NumberOfSteps
-        masterClockStep = -1
-        lastStep = seqLength
-        if (MetronomeBeeps > 0) {
-            metronome = true
-        } else {
-            metronome = false
-        }
-        control.inBackground(() => {
-            while (true) {
-                runMasterClock()
-                //control.waitMicros(2000)
-                basic.pause(1)
+        if (conductorUnlocked) {
+            radio.setGroup(84)
+            extClock = 0
+            masterTempo = bpm
+            stepLengthms = 60000 / bpm
+            stepLengthms = stepLengthms >> subDivision
+            isMasterClock = true
+            seqLength = NumberOfSteps
+            masterClockStep = -1
+            lastStep = seqLength
+            if (MetronomeBeeps > 0) {
+                metronome = true
+            } else {
+                metronome = false
             }
-        })
-        nextClockTickTime = input.runningTime() + stepLengthms
+            control.inBackground(() => {
+                while (true) {
+                    runMasterClock()
+                    //control.waitMicros(2000)
+                    basic.pause(1)
+                }
+            })
+            nextClockTickTime = input.runningTime() + stepLengthms
+        } else {
+            basic.showString("wrong password")
+        }
     }
 } 
