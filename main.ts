@@ -1,4 +1,4 @@
-//  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+OrchestraMusician.waitFor(0)//  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //  !!!!!!!!!! changed timeslot timing to waitmicros NEEDS TESTING !!!!!!!!!
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // updated and pushed
@@ -1061,13 +1061,11 @@ namespace OrchestraMusician {
     }
 
     /**
-         * Setup a simple sequencer with a thumper
-         * @param With how many steps
-         * @param stepsAndUse internal or external clock
+         * Setup a simple sequencer that can control a second instrument with the last track
          */
-    //% blockId="MBORCH_makeASimplerSequencerWThumper" block="make a simple sequencer with a thumper:| number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the name of the thumper i want to control with the bottom row is $thumperName"
+    //% blockId="MBORCH_makeASimplerSequencerFor2Instruments" block="make a simple sequencer for two instruments:| number of steps = $NumberOfSteps|the instrument I am controlling with the first 3 rows is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the name of the instrument i want to control with the bottom row is $thumperName|the sound i want to control on that instrument is $thumperNumber"
     //% weight=10
-    export function makeASimpleSequencerWithThumper(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, thumperName: string): void {
+    export function makeASimpleSequencerWithThumper(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, thumperName: string, thumperNumber: number): void {
         polySend = true  //make it send polyphonic ints
         replaceLastPolyWithThumper = true
         //OrchestraMusician.setUpAsMusician(MusID)
@@ -1076,7 +1074,7 @@ namespace OrchestraMusician {
         setUpTrackRouting(channels.one, masterName, note1)
         setUpTrackRouting(channels.two, masterName, note2)
         setUpTrackRouting(channels.three, masterName, note3)
-        setUpTrackRouting(channels.four, thumperName, 0)
+        setUpTrackRouting(channels.four, thumperName, thumperNumber)
         control.inBackground(function () {
             while (true) {
                 basic.pause(20)
