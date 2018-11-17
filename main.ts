@@ -417,16 +417,22 @@ namespace OrchestraInstrument {
     }
 
     function actuateThumper(activityType: number) {
-        led.toggle(0, 4)
-        led.toggle(1, 4)
-        led.toggle(2, 4)
-        led.toggle(3, 4)
-        led.toggle(4, 4)
+        //led.unplot(0, activityType)
+        //led.unplot(1, activityType)
+        //led.unplot(2, activityType)
+        //led.unplot(3, activityType)
+        //led.unplot(4, activityType)
 
         switch (activityType) {
 
             case 1: {
-
+                basic.showLeds(`
+    . # . # .
+    . # . # .
+    . # . # .
+    . # . # .
+    . # . # .
+    `, 0)
                 pins.digitalWritePin(DigitalPin.P0, 1)
                 control.waitMicros(10000);
                 pins.digitalWritePin(DigitalPin.P0, 0)
@@ -442,17 +448,28 @@ namespace OrchestraInstrument {
 
             case 2: {
                 for (let i = 0; i < 7; i++) {
+                    basic.showLeds(`
+    # . # . #
+    # . # . #
+    # . # . #
+    # . # . #
+    # . # . #
+    `, 0)
                     pins.digitalWritePin(DigitalPin.P0, 1)
                     control.waitMicros(5000)
+                    led.toggleAll()
                     pins.digitalWritePin(DigitalPin.P0, 0)
                     control.waitMicros(6000)
                 }
                 break;
             }
             case 3: {
+                
                 for (let i = 0; i <= 6 - 1; i++) {
+                    led.plotAll()
                     pins.digitalWritePin(DigitalPin.P0, 1)
                     basic.pause(5)
+                    basic.clearScreen()
                     //control.waitMicros(4000)
                     pins.digitalWritePin(DigitalPin.P0, 0)
                     basic.pause((i + 1) * 5)
@@ -462,6 +479,13 @@ namespace OrchestraInstrument {
             }
 
             default: {
+                basic.showLeds(`
+    . . . . .
+    . . . . .
+    . . . . .
+    # # # # #
+    # # # # #
+    `, 0)
                 pins.digitalWritePin(DigitalPin.P0, 1)
                 basic.pause(5)
                 pins.digitalWritePin(DigitalPin.P0, 0)
@@ -470,11 +494,7 @@ namespace OrchestraInstrument {
         }
 
         pins.digitalWritePin(DigitalPin.P0, 0)
-        led.toggle(0, 4)
-        led.toggle(1, 4)
-        led.toggle(2, 4)
-        led.toggle(3, 4)
-        led.toggle(4, 4)
+        basic.clearScreen()
     }
 
     function pulseThumperNose() {
