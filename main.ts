@@ -1,8 +1,9 @@
-OrchestraMusician.waitFor(0)//  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //  !!!!!!!!!! changed timeslot timing to waitmicros NEEDS TESTING !!!!!!!!!
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// updated and pushed
-
+/**
+ * rev 1
+*/
 let conductorPassword = 1983
 let enteredPassword = 0
 let replaceLastPolyWithThumper = false
@@ -357,16 +358,17 @@ namespace OrchestraInstrument {
 
     function handleThumperMutes(muteInt: number) {
         /*
-        Bob 00000001
-        Tim 00000010
-        Ted 00000100
-        Pat 00001000
-        Cat 00010000 (also thumper)
-        Dad 00100000
-        Mum 01000000
-        Zim 10000000
+        Bob         00000001
+        Tim         00000010
+        Ted         00000100
+        Pat         00001000
+        Cat         00010000 (also thumper)
+        Dad         00100000
+        Mum         01000000
+        Zim         10000000
+        thumpers   100000000
         */
-        if (muteInt & 0b00010000) {
+        if ((muteInt & 0b00010000) || (muteInt & 0b100000000)) {
             if (!thumperIsMuted) {
                 basic.showIcon(IconNames.No, 0)
             }
@@ -484,11 +486,14 @@ namespace OrchestraInstrument {
                     led.plot(3, 2)
                     led.plot(2, 3)
                     basic.pause(50)
-                    led.unplot(1, 2)
-                    led.unplot(2, 2)
-                    led.unplot(3, 2)
-                    led.unplot(2, 3)
-                    basic.pause(1950)
+                    if (!thumperIsMuted) { //avoid turning middle led off if we are muted
+                        led.unplot(1, 2)
+                        led.unplot(2, 2)
+                        led.unplot(3, 2)
+                        led.unplot(2, 3)
+                        basic.pause(1950)
+                    }
+
                 } else {
                     basic.pause(100)
                 }
@@ -1065,7 +1070,7 @@ namespace OrchestraMusician {
          */
     //% blockId="MBORCH_makeASimplerSequencerFor2Instruments" block="make a simple sequencer for two instruments:| number of steps = $NumberOfSteps|the instrument I am controlling with the first 3 rows is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the name of the instrument i want to control with the bottom row is $thumperName|the sound i want to control on that instrument is $thumperNumber"
     //% weight=10
-    export function makeASimpleSequencerWithThumper(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, thumperName: string, thumperNumber: number): void {
+    export function makeASimpleSequencerFor2Inst(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, thumperName: string, thumperNumber: number): void {
         polySend = true  //make it send polyphonic ints
         replaceLastPolyWithThumper = true
         //OrchestraMusician.setUpAsMusician(MusID)
