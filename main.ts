@@ -8,7 +8,7 @@ let conductorPassword = 1983
 let enteredPassword = 0
 let replaceLastPolyWithThumper = false
 let numberOfMusicians = 16 //default number of musicians
-let radioSendWindow = 750
+let radioSendWindow = 2000
 let polySend = false //if we are sending all messages to one instrument
 let polyInstrumentName = "Bob"
 let polySendBuffer = 0
@@ -411,6 +411,7 @@ namespace OrchestraInstrument {
         basic.pause(200)
         basic.clearScreen()
         pulseThumperNose()
+        //led.plot(2,4)
         if (thumperIsMuted) {
             basic.showIcon(IconNames.No, 1)
         }
@@ -464,7 +465,7 @@ namespace OrchestraInstrument {
                 break;
             }
             case 3: {
-                
+
                 for (let i = 0; i <= 6 - 1; i++) {
                     led.plotAll()
                     pins.digitalWritePin(DigitalPin.P0, 1)
@@ -489,6 +490,7 @@ namespace OrchestraInstrument {
                 pins.digitalWritePin(DigitalPin.P0, 1)
                 basic.pause(5)
                 pins.digitalWritePin(DigitalPin.P0, 0)
+                basic.pause(10)
                 break;
             }
         }
@@ -499,24 +501,29 @@ namespace OrchestraInstrument {
 
     function pulseThumperNose() {
         control.inBackground(function () {
-            while (true) {
-                if (!thumperIsMuted) {
-                    led.plot(1, 2)
-                    led.plot(2, 2)
-                    led.plot(3, 2)
-                    led.plot(2, 3)
-                    basic.pause(50)
-                    if (!thumperIsMuted) { //avoid turning middle led off if we are muted
-                        led.unplot(1, 2)
-                        led.unplot(2, 2)
-                        led.unplot(3, 2)
-                        led.unplot(2, 3)
-                        basic.pause(1950)
-                    }
 
-                } else {
-                    basic.pause(100)
-                }
+            while (true) {
+                /*
+                    if (!thumperIsMuted) {
+                        led.plot(1, 2)
+                        led.plot(2, 2)
+                        led.plot(3, 2)
+                        led.plot(2, 3)
+                        basic.pause(50)
+                        if (!thumperIsMuted) { //avoid turning middle led off if we are muted
+                            led.unplot(1, 2)
+                            led.unplot(2, 2)
+                            led.unplot(3, 2)
+                            led.unplot(2, 3)
+                            basic.pause(1950)
+                        }
+    
+                    } else {
+                        basic.pause(100)
+                    }
+                    */
+                led.plot(2, 4)
+                basic.pause(100)
             }
         })
     }
@@ -829,7 +836,8 @@ namespace OrchestraMusician {
     }
 
     function waitForTimeSlot() {
-        control.waitMicros(microBitID * timeSlotMode * radioSendWindow) // wait as long as the slot mode will allow
+        let timeToWait = microBitID * radioSendWindow
+        control.waitMicros(timeToWait) // wait as long as the slot mode will allow
     }
 
     function legacySendTriggersOut() {
@@ -1189,7 +1197,7 @@ namespace OrchestraMusician {
      * Setup your micro:bit as a Musician
      * @param withId a unique ID so your Musician knows where to stand (and also so the Musicians don't talk at the same time)
      */
-    //% blockId="MBORCH_setUpAsMusician" block="join orchestra as musician with ID %withID" weight=100
+    //% blockId="MBORCH_setUpAsMusician" block="join the orchestra as a musician with the ID number %withID" weight=100
     export function setUpAsMusician(withID: number): void {
         radio.setGroup(84) // tempo and clock ticks will be sent on radio group 84
         microBitID = withID
@@ -1231,7 +1239,6 @@ namespace OrchestraMusician {
                 radio.sendValue(to, note)
                 radio.setGroup(84) // change back to the group where tempo and clock ticks are
             }
-
         } else {
             basic.showIcon(IconNames.No, 0)
         }
