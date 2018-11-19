@@ -2,7 +2,8 @@
 //  !!!!!!!!!! changed timeslot timing to waitmicros NEEDS TESTING !!!!!!!!!
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /**
- * rev 1
+ * rev 12
+ * made timeslot work properly, only allow 1 int to be sent
 */
 let conductorPassword = 1983
 let enteredPassword = 0
