@@ -1122,34 +1122,12 @@ namespace OrchestraMusician {
     }
 
     /**
-         * Setup a simple sequencer that can control a second instrument with the last track
-         */
-    //% blockId="MBORCH_makeASimplerSequencerFor2Instruments" block="make a simple sequencer for two instruments:| number of steps = $NumberOfSteps|the instrument I am controlling with the first 3 rows is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the name of the instrument i want to control with the bottom row is $thumperName|the sound i want to control on that instrument is $thumperNumber"
-    //% weight=10
-    export function makeASimpleSequencerFor2Inst(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, thumperName: string, thumperNumber: number): void {
-        polySend = true  //make it send polyphonic ints
-        replaceLastPolyWithThumper = true
-        //OrchestraMusician.setUpAsMusician(MusID)
-        polyInstrumentName = masterName
-        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBlipsNoYes.yes_please)
-        setUpTrackRouting(channels.one, masterName, note1)
-        setUpTrackRouting(channels.two, masterName, note2)
-        setUpTrackRouting(channels.three, masterName, note3)
-        setUpTrackRouting(channels.four, thumperName, thumperNumber)
-        control.inBackground(function () {
-            while (true) {
-                basic.pause(20)
-                runSequencer()
-            }
-        })
-    }
-
-    /**
          * Setup a simple sequencer
          * @param With how many steps
          * @param stepsAndUse internal or external clock
          */
     //% blockId="MBORCH_makeASimplerSequencer" block="make a simple sequencer:|number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the fourth sound I want to control is $note4"
+    //% note2.defl=1 note3.defl=2 note4.defl=3
     export function makeASimpleSequencer(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, note4: number): void {
         polySend = true  //make it send polyphonic ints        
         polyInstrumentName = masterName
@@ -1166,6 +1144,31 @@ namespace OrchestraMusician {
         })
     }
 
+    /**
+         * Setup a simple autonomous sequencer that will run without a master clock controlling it
+         * @param With how many steps
+         * @param stepsAndUse internal or external clock
+         */
+    //% blockId="MBORCH_makeASimpleAutonomousSequencer" block="make an autonomous simple  sequencer:|number of steps = $NumberOfSteps|the instrument I am controlling is called $masterName the first sound I want to control is $note1|the second sound I want to control is $note2|the third sound I want to control is $note3|the fourth sound I want to control is $note4|tempo = $tEmpo"
+    //% note2.defl=1 note3.defl=2 note4.defl=3
+    //% tEmpo.defl=60
+    //% advanced = true
+    export function makeASimpleAutonomousSequencer(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, note4: number, tEmpo:number): void {
+        polySend = true  //make it send polyphonic ints        
+        polyInstrumentName = masterName
+
+        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.internal_clock, tEmpo, metronomeNoYes.no_thanks, allowBlipsNoYes.yes_please)
+        setUpTrackRouting(channels.one, masterName, note1)
+        setUpTrackRouting(channels.two, masterName, note2)
+        setUpTrackRouting(channels.three, masterName, note3)
+        setUpTrackRouting(channels.four, masterName, note4)
+        control.inBackground(function () {
+            while (true) {
+                basic.pause(20)
+                runSequencer()
+            }
+        })
+    }
 
     /**
          * Setup a sequencer
@@ -1175,6 +1178,7 @@ namespace OrchestraMusician {
     //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4" advanced=true weight=900
     export function makeASequencer(NumberOfSteps: numberofSteps, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
         timeSlotMode = timeSlotModes.stagger
+        radioSendWindow = 4000
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.yes_please, allowBlipsNoYes.yes_please)
         setUpTrackRouting(channels.one, name1, note1)
         setUpTrackRouting(channels.two, name2, note2)
@@ -1258,7 +1262,7 @@ namespace OrchestraMusician {
     /**
      * Send a command to the Microbit Orchestra
      */
-    //%blockId="MBORCH_sendNote" block="send note number %note| to %to" weight=60
+    //%blockId="MBORCH_sendNote" block="ask the instrument $to to play sound number $note" weight=60
     export function send(note: number, to: string) {
         if (!musicianIsMuted) {
             //basic.pause(microBitID * timeSlotSpacing) //safer pause
@@ -1678,7 +1682,6 @@ namespace OrchestraConductor {
             control.inBackground(() => {
                 while (true) {
                     runMasterClock()
-                    //control.waitMicros(2000)
                     basic.pause(1)
                 }
             })
