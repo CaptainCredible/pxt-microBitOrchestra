@@ -2,9 +2,15 @@
 //  !!!!!!!!!! changed timeslot timing to waitmicros NEEDS TESTING !!!!!!!!!
 //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /**
- * rev 12
+ * rev 123
  * made timeslot work properly, only allow 1 int to be sent
+ * added shake
 */
+let shakeTimer = 0
+let shake = 0
+let shook = 0
+let shakeDebounce = 100
+let shakeThresh = 700
 let conductorPassword = 1983
 let enteredPassword = 0
 let replaceLastPolyWithThumper = false
@@ -652,11 +658,7 @@ namespace OrchestraMusician {
         control.onEvent(1984, 10, thing);
     }
 
-    let shakeTimer = 0
-    let shake = 0
-    let shook = 0
-    let shakeDebounce = 100
-    let shakeThresh = 700
+
 
     /**
          * Registers code to run when button shake is shook
