@@ -21,6 +21,7 @@ let oldButtB = false
 let musicianIsMuted = false
 let ABWasPressed = false
 let ABtimer = 0
+let Btimer = 0
 let numberOfOutputs = 128
 let outputMode = 0 // how to automatically handle outputs 0 = none, 1 = pins, 2 = mcp23017
 let outputIsOn: boolean[] = [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
@@ -732,6 +733,7 @@ namespace OrchestraMusician {
         led.plot(4, channelSelect)
     }
 
+    let isCleared = false
 
     function checkButts() {
         // BUTTON A
@@ -745,39 +747,52 @@ namespace OrchestraMusician {
             aWasPressed = false
         }
         // BUTTON B
-        if (input.buttonIsPressed(Button.B) && !(bWasPressed)) {
-            bWasPressed = true
-            if (input.runningTime() - lastClockTickTime > (stepLengthms >> 2) * 3) {
-                stepToWrite = (currentStep + 1) % seqLength
-                earlyTrigger = true
-            } else {
-                stepToWrite = currentStep
-                earlyTrigger = false
-            }
-            if (channelSelect == 0) {
-                seqA[stepToWrite] = true
-            } else if (channelSelect == 1) {
-                seqB[stepToWrite] = true
-            } else if (channelSelect == 2) {
-                seqC[stepToWrite] = true
-            } else if (channelSelect == 3) {
-                seqD[stepToWrite] = true
-            }
-            triggerBuffer[channelSelect] = true
-            if (!earlyTrigger) { //only handle tones if the button was pressed after the cursor got to the step we are writing to
-                if (allowBlipsAndBloops) {
-                    handleTones()
+        if (input.buttonIsPressed(Button.B)) {
+            if (!bWasPressed) {
+                bWasPressed = true
+                Btimer = input.runningTime() //HERE I AM
+                if (input.runningTime() - lastClockTickTime > (stepLengthms >> 2) * 3) {
+                    stepToWrite = (currentStep + 1) % seqLength
+                    earlyTrigger = true
+                } else {
+                    stepToWrite = currentStep
+                    earlyTrigger = false
+                }
+                if (channelSelect == 0) {
+                    seqA[stepToWrite] = true
+                } else if (channelSelect == 1) {
+                    seqB[stepToWrite] = true
+                } else if (channelSelect == 2) {
+                    seqC[stepToWrite] = true
+                } else if (channelSelect == 3) {
+                    seqD[stepToWrite] = true
+                }
+                triggerBuffer[channelSelect] = true
+                if (!earlyTrigger) { //only handle tones if the button was pressed after the cursor got to the step we are writing to
+                    if (allowBlipsAndBloops) {
+                        handleTones()
+                    }
+
+                    if (channelIsSetup[channelSelect] && microBitID != 9876) {   //check that we have set up this channel and that we have set a microbit ID
+                        send(channelOutNotes[channelSelect], channelOutNames[channelSelect])
+                    }
                 }
 
-                if (channelIsSetup[channelSelect] && microBitID != 9876) {   //check that we have set up this channel and that we have set a microbit ID
-                    send(channelOutNotes[channelSelect], channelOutNames[channelSelect])
+                clearTriggerBuffer()
+                updatePage()
+            } else { //if B already was pressed in
+                if ((input.runningTime() > Btimer + 1000) && !isCleared) {
+                    clearChannel(channelSelect)
+                    clearAnimation(channelSelect)
+                    isCleared = true
+                    updatePage()
                 }
             }
-            clearTriggerBuffer()
-            updatePage()
         } else if (!(input.buttonIsPressed(Button.B)) && bWasPressed) {
             bWasPressed = false
+            isCleared = false
         }
+
         // BOTH
         if (input.buttonIsPressed(Button.AB)) {
             if (!ABWasPressed) {
@@ -799,7 +814,16 @@ namespace OrchestraMusician {
         }
     }
 
-
+    function clearAnimation(chann: number) {
+        for (let i = 4; i >= 0; i--) {
+            led.plot(i, chann)
+            basic.pause(10)
+        }
+        for (let i = 4; i >= 0; i--) {
+            led.unplot(i, chann)
+            basic.pause(10)
+        }
+    }
 
     function sendTriggersOut() {  //read the buffer and send any notes that need to be sent
         if (polySend) {
@@ -1069,21 +1093,24 @@ namespace OrchestraMusician {
             masterTempo = 480
         }
         sequencerExists = true
-        input.onShake(() => {
-            for (let i = 0; i <= seqLength; i++) {
-                if (channelSelect == 0) {
-                    seqA[i] = false
-                } else if (channelSelect == 1) {
-                    seqB[i] = false
-                } else if (channelSelect == 2) {
-                    seqC[i] = false
-                } else if (channelSelect == 3) {
-                    seqD[i] = false
-                }
-            }
-            updatePage()
-        })
     }
+
+    function clearChannel(thisChannel: number) {
+        for (let i = 0; i <= seqLength; i++) {
+            if (thisChannel == 0) {
+                seqA[i] = false
+            } else if (thisChannel == 1) {
+                seqB[i] = false
+            } else if (thisChannel == 2) {
+                seqC[i] = false
+            } else if (thisChannel == 3) {
+                seqD[i] = false
+            }
+        }
+        updatePage()
+
+    }
+
 
     /**
      * set number of musicians in orchestra
