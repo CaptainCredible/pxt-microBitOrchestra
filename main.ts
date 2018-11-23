@@ -1153,7 +1153,7 @@ namespace OrchestraMusician {
     //% note2.defl=1 note3.defl=2 note4.defl=3
     //% tEmpo.defl=60
     //% advanced = true
-    export function makeASimpleAutonomousSequencer(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, note4: number, tEmpo:number): void {
+    export function makeASimpleAutonomousSequencer(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, note4: number, tEmpo: number): void {
         polySend = true  //make it send polyphonic ints        
         polyInstrumentName = masterName
 
