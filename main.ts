@@ -652,6 +652,33 @@ namespace OrchestraMusician {
         control.onEvent(1984, 10, thing);
     }
 
+    let shakeTimer = 0
+    let shake = 0
+    let shook = 0
+    let shakeDebounce = 100
+    let shakeThresh = 700
+
+    /**
+         * Registers code to run when button shake is shook
+         */
+
+    //%block="as soon as shaken" 
+    //%color=#D400D4 weight=65
+    export function onShook(thing: () => void) {
+        control.inBackground(function () {
+            while (true) {
+                shook = shake
+                shake = input.acceleration(Dimension.Y)
+                if ((shook - shake > shakeThresh) && (input.runningTime() - shakeTimer > shakeDebounce)) {
+                    shakeTimer = input.runningTime()
+                    control.raiseEvent(1985, 10)
+                }
+                basic.pause(10)
+            }
+        })
+        control.onEvent(1985, 10, thing);
+    }
+
 
     /**
      * inserts a pause to wait for tick
