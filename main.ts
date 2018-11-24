@@ -5,7 +5,28 @@
  * rev 123
  * made timeslot work properly, only allow 1 int to be sent
  * added shake
+ * Added thumper scoring
 */
+let receivedPrematureA = false
+let prematureAtimer = 0
+let ready4A = false
+let ready4Atimer = 0
+
+let receivedPrematureB = false
+let prematureBtimer = 0
+let ready4B = false
+let ready4Btimer = 0
+
+let receivedPrematureRist = false
+let prematureRistTimer = 0
+let ready4Rist = false
+let ready4RistTimer = 0
+
+let instrumentName = "Hen"
+let myScore = 0
+let slack = 100
+let ledIsOn = true
+let ledTimer = 0
 let shakeTimer = 0
 let shake = 0
 let shook = 0
@@ -200,6 +221,151 @@ enum beepsOnOff {
 //%blockId="OrchestraInstrument" block="Orchestra Instruments"
 namespace OrchestraInstrument {
 
+    //GAME//
+
+
+    function startGameTimers() {
+        control.inBackground(function () {
+            while (true) {
+                if (receivedPrematureA) {
+                    if (input.runningTime() - prematureAtimer > slack) {
+                        receivedPrematureA = false
+                        // led.plot(2, 2)
+                        // ledTimer = input.runningTime()
+                        // ledIsOn = true
+                        myScore--
+                    }
+                }
+
+                if (ready4A) {
+                    if (input.runningTime() - ready4Atimer > slack) {
+                        ready4A = false
+                    }
+                }
+
+                if (receivedPrematureB) {
+                    if (input.runningTime() - prematureBtimer > slack) {
+                        receivedPrematureB = false
+                        // led.plot(2, 2)
+                        // ledTimer = input.runningTime()
+                        // ledIsOn = true
+                        myScore--
+                    }
+                }
+
+                if (ready4B) {
+                    if (input.runningTime() - ready4Btimer > slack) {
+                        ready4B = false
+                    }
+                }
+
+                if (receivedPrematureRist) {
+                    if (input.runningTime() - prematureRistTimer > slack) {
+                        receivedPrematureRist = false
+                    }
+                }
+
+                if (ready4Rist) {
+                    if (input.runningTime() - ready4RistTimer > slack) {
+                        ready4Rist = false
+                    }
+                }
+
+                if (ledIsOn) {
+                    if (input.runningTime() - ledTimer > slack) {
+                        basic.clearScreen()
+                        ledIsOn = false
+                    }
+                }
+                basic.pause(10)
+            }
+        })
+    }
+
+    function handleAscoring() {
+        if (ready4A) {
+            myScore += 2
+            ready4A = false
+        } else if (!receivedPrematureA) {
+            receivedPrematureA = true
+            prematureAtimer = input.runningTime()
+        } else {
+            myScore--
+            prematureAtimer = input.runningTime()
+        }
+    }
+
+    /// HANDLESCORING
+
+    function handleBscoring() {
+        if (ready4B) {
+            myScore += 2
+            ready4B = false
+        } else if (!receivedPrematureB) {
+            receivedPrematureB = true
+            prematureBtimer = input.runningTime()
+        } else {
+            myScore--
+            prematureBtimer = input.runningTime()
+        }
+    }
+
+    function handleRistScoring() {
+        if (ready4Rist) {
+            myScore += 3
+            ready4Rist = false
+        } else if (!receivedPrematureRist) {
+            receivedPrematureRist = true
+            prematureRistTimer = input.runningTime()
+        } else {
+            prematureBtimer = input.runningTime()
+        }
+    }
+
+
+    function handleScore(nameReceived: string, valueReceived: number) {
+        if (nameReceived == instrumentName) {
+            if (valueReceived == 0) {
+                handleAscoring()
+            } else if (valueReceived == 2) {
+                handleBscoring()
+            } else if (valueReceived == 3) {
+                handleRistScoring()
+            } else if (valueReceived == 1337) { //reset score command
+                myScore = 0
+            }
+
+        } else if (nameReceived == "Gam") { //if it is Game Master
+            if (valueReceived == 0) {
+                if (receivedPrematureA) {
+                    myScore += 2
+                    receivedPrematureA = false
+                } else {
+                    ready4A = true
+                    ready4Atimer = input.runningTime()
+                }
+            } else if (valueReceived == 2) {
+                if (receivedPrematureB) {
+                    myScore += 2
+                    receivedPrematureB = false
+                } else {
+                    ready4B = true
+                    ready4Btimer = input.runningTime()
+                }
+            } else if (valueReceived == 3) {
+                if (receivedPrematureRist) {
+                    myScore += 3
+                    receivedPrematureRist = false
+                } else {
+                    ready4Rist = true
+                    ready4RistTimer = input.runningTime()
+                }
+            }
+        }
+    }
+
+    ///////
+
     /**
      * Setup your micro:bit as an Instrument
      * @param withNam a unique name that the Musicians can shout to get your Instruments attention
@@ -388,7 +554,7 @@ namespace OrchestraInstrument {
             thumperIsMuted = false
         }
     }
-
+    let gameActivated = true
     /**
      * Make a Thumper, a device that listens for one specific radio message and triggers one actuator on P0
      * @param Name
@@ -396,8 +562,16 @@ namespace OrchestraInstrument {
      */
     //% blockId="MBORCH_Thumper" block="make a thumper with the name %Name"
     export function makeAThumper(Name: string): void {
+        if (gameActivated) {
+            startGameTimers()
+        }
+
+
         radio.setGroup(83)
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
+            if (gameActivated) {
+                handleScore(receivedName, value)
+            }
             if (!thumperIsMuted) {
                 if (receivedName == Name) {
                     actuateThumper(value)
@@ -414,6 +588,7 @@ namespace OrchestraInstrument {
             if (receivedName == "m") {
                 handleThumperMutes(value)
             }
+
         })
         basic.showString(Name, 40)
         basic.pause(200)
@@ -423,6 +598,11 @@ namespace OrchestraInstrument {
         if (thumperIsMuted) {
             basic.showIcon(IconNames.No, 1)
         }
+
+
+        input.onButtonPressed(Button.AB, function () {
+            basic.showNumber(myScore)
+        })
     }
 
     function actuateThumper(activityType: number) {
