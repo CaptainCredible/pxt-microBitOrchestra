@@ -22,7 +22,7 @@ let prematureRistTimer = 0
 let ready4Rist = false
 let ready4RistTimer = 0
 
-let instrumentName = "Hen"
+//let instrumentName = "Hen"
 let myScore = 0
 let slack = 100
 let ledIsOn = true
@@ -324,7 +324,7 @@ namespace OrchestraInstrument {
 
 
     function handleScore(nameReceived: string, valueReceived: number) {
-        if (nameReceived == instrumentName) {
+        if (nameReceived == InstrumentName) {
             if (valueReceived == 0) {
                 handleAscoring()
             } else if (valueReceived == 2) {
