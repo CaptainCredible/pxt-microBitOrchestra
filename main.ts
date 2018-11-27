@@ -7,6 +7,12 @@
  * added shake
  * Added thumper scoring
 */
+let redirectLocalHW = false
+let myBunNumber = 0
+let myBunAction = 0
+let bunSlave = false
+
+let gameActivated = true
 let receivedPrematureA = false
 let prematureAtimer = 0
 let ready4A = false
@@ -142,6 +148,19 @@ enum metronomeNoYes {
     no_thanks = 0,
     //%block="yes_please"
     yes_please = 1
+}
+
+enum bunSolactions {
+    //%block="(0) tok"
+    tok = 0,
+    //%block="(1) todok"
+    todok = 1,
+    //%block="(2) brrrrp"
+    brrrp = 2,
+    //%block="(3) skrrr"
+    skrrr = 3,
+    //%block="auto"
+    auto = 4
 }
 
 enum numberofSteps {
@@ -554,7 +573,26 @@ namespace OrchestraInstrument {
             thumperIsMuted = false
         }
     }
-    let gameActivated = true
+
+    //% blockId="setupBunMode" block="slave this thumper to Bun group as number $bunNumber and use solenoid action $solAction"
+    //% solAction.defl=bunSolactions.auto
+    //% advanced=true
+    export function slaveToBun(bunNumber: number, solAction: bunSolactions) {
+        bunSlave = true
+        myBunNumber = bunNumber
+        myBunAction = solAction
+        if (solAction == 4) {
+            myBunAction = myBunNumber % 4
+        }
+    }
+
+
+    function handleBun(num: number) {
+        if (num == myBunNumber) {
+            actuateThumper(myBunAction)
+        }
+    }
+
     /**
      * Make a Thumper, a device that listens for one specific radio message and triggers one actuator on P0
      * @param Name
@@ -565,30 +603,40 @@ namespace OrchestraInstrument {
         if (gameActivated) {
             startGameTimers()
         }
-
-
         radio.setGroup(83)
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
             if (gameActivated) {
                 handleScore(receivedName, value)
             }
             if (!thumperIsMuted) {
-                if (receivedName == Name) {
+                if (receivedName == Name || receivedName == "Rab") {
                     actuateThumper(value)
-                } else if (receivedName == Name + "P") {
+                } else if ((receivedName == Name + "P") || (receivedName == "RabP")) {
                     let myBitMask = 1
                     for (let i = 0; i < 16; i++) {
                         if (value & (myBitMask << i)) {
                             actuateThumper(i)
                         }
                     }
+                } else if (bunSlave) {
+
+                    if (receivedName == "Bun") {
+                        handleBun(value)
+                    } else if (receivedName == "BunP") {
+                        //led.toggleAll()
+                        let myBitMask = 1
+                        for (let i = 0; i < 16; i++) {
+                            if (value & (myBitMask << i)) {
+                                handleBun(i)
+                            }
+                        }
+                    }
+                }
+
+                if (receivedName == "m") {
+                    handleThumperMutes(value)
                 }
             }
-
-            if (receivedName == "m") {
-                handleThumperMutes(value)
-            }
-
         })
         basic.showString(Name, 40)
         basic.pause(200)
@@ -774,6 +822,16 @@ namespace OrchestraInstrument {
         music.playTone(440, 1)
     }
 
+    /**
+ * Registers code to run when button A is pushed
+ */
+    //
+    //%block="when sequencer plays local sound $sound" weight=80
+    //%color=#D400D4 weight=70 //%sound.min=1 sound.max=128 sound.defl=1
+    export function onSequencerTrigger(sound: number, thing: Action) {
+        control.onEvent(80085, sound, thing);
+    }
+
 
 }
 
@@ -794,6 +852,8 @@ namespace OrchestraMusician {
     export function sertTimeSlotMode(Type: timeSlotModes) {
         timeSlotMode = Type
     }
+
+
 
     /**
      * Registers code to run when button A is pushed
@@ -869,6 +929,9 @@ namespace OrchestraMusician {
     //% blockId="MBORCH_waitForStep" block="wait for step number %step" 
     //% weight=50
     export function waitFor(step: number) {
+        if(runningInSimulator){
+            extClock=0 /////HERE
+        }
         extClock = 1
         waiting = true
         while (waiting) {
@@ -982,7 +1045,9 @@ namespace OrchestraMusician {
                         handleTones()
                     }
 
-                    if (channelIsSetup[channelSelect] && microBitID != 9876) {   //check that we have set up this channel and that we have set a microbit ID
+                    if (redirectLocalHW) {
+                        control.raiseEvent(80085, channelOutNotes[channelSelect] + 1)
+                    } else if (channelIsSetup[channelSelect] && microBitID != 9876) {   //check that we have set up this channel and that we have set a microbit ID
                         send(channelOutNotes[channelSelect], channelOutNames[channelSelect])
                     }
                 }
@@ -1034,6 +1099,15 @@ namespace OrchestraMusician {
         }
     }
 
+    //%blockID="redirectToLocal" block="handle sequencer playback locally"
+    export function redirectSeqToLocal() {
+        redirectLocalHW = true
+        timeSlotMode = 1337
+    }
+
+
+
+
     function sendTriggersOut() {  //read the buffer and send any notes that need to be sent
         if (polySend) {
             let scanLength = 4
@@ -1067,11 +1141,24 @@ namespace OrchestraMusician {
                 }
             }
         }
+        if (timeSlotMode == 1337) {
+            localSendTriggersOut()
+        }
     }
 
     function waitForTimeSlot() {
         let timeToWait = microBitID * radioSendWindow
         control.waitMicros(timeToWait) // wait as long as the slot mode will allow
+    }
+
+    function localSendTriggersOut() {
+        for (let m = 0; m < 4; m++) {
+            if (triggerBuffer[m]) {
+                control.raiseEvent(80085, m + 1)
+                //basic.showNumber(m+1)
+
+            }
+        }
     }
 
     function legacySendTriggersOut() {
@@ -1340,7 +1427,15 @@ namespace OrchestraMusician {
     export function makeASimpleSequencer(NumberOfSteps: numberofSteps, masterName: string, note1: number, note2: number, note3: number, note4: number): void {
         polySend = true  //make it send polyphonic ints        
         polyInstrumentName = masterName
-        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBlipsNoYes.yes_please)
+        if (masterName == "Me") {
+            redirectLocalHW = true
+            timeSlotMode = 1337
+        }
+        let allowBleeps = 1
+        if (redirectLocalHW) {
+            allowBleeps = 0
+        }
+        makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBleeps)
         setUpTrackRouting(channels.one, masterName, note1)
         setUpTrackRouting(channels.two, masterName, note2)
         setUpTrackRouting(channels.three, masterName, note3)
@@ -1386,7 +1481,10 @@ namespace OrchestraMusician {
          */
     //% blockId="MBORCH_makeASequencer" block="make a sequencer:|number of steps %NumberOfSteps|track 1 sends name %name1 and number %note1|track 2 sends name %name2 and number %note2|track 3 sends name %name3 and number %note3|track 4 sends name %name4 and number %note4" advanced=true weight=900
     export function makeASequencer(NumberOfSteps: numberofSteps, name1: string, note1: number, name2: string, note2: number, name3: string, note3: number, name4: string, note4: number): void {
-        timeSlotMode = timeSlotModes.stagger
+        if (!redirectLocalHW) {
+            timeSlotMode = timeSlotModes.stagger //only set this if we need to
+        }
+
         radioSendWindow = 4000
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.yes_please, allowBlipsNoYes.yes_please)
         setUpTrackRouting(channels.one, name1, note1)
