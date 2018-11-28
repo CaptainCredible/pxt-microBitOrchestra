@@ -6,6 +6,7 @@
  * made timeslot work properly, only allow 1 int to be sent
  * added shake
  * Added thumper scoring
+ * started improving waitforstep
 */
 let redirectLocalHW = false
 let myBunNumber = 0
@@ -929,8 +930,8 @@ namespace OrchestraMusician {
     //% blockId="MBORCH_waitForStep" block="wait for step number %step" 
     //% weight=50
     export function waitFor(step: number) {
-        if(runningInSimulator){
-            extClock=0 /////HERE
+        if (runningInSimulator) {
+            extClock = 0 /////HERE
         }
         extClock = 1
         waiting = true
