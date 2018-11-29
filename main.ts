@@ -6,6 +6,7 @@
  * made timeslot work properly, only allow 1 int to be sent
  * added shake
  * Added thumper scoring
+ * started improving waitforstep
 */
 let redirectLocalHW = false
 let myBunNumber = 0
@@ -958,6 +959,7 @@ seqLength = simSeqLength
     //% weight=50
     export function waitFor(step: number) {
         if (runningInSimulator) {
+
             extClock = 0
             if(!clockIsBeingSimulated){
                 simulateClock()
