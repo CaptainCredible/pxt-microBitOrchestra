@@ -921,32 +921,64 @@ namespace OrchestraMusician {
         control.onEvent(1985, 10, thing);
     }
 
+let clockIsBeingSimulated = false
+function simulateClock(){ //run a fake master clock in the simulator
+    if(!clockIsBeingSimulated){
+        stepLengthms = 60000 / masterTempo
+        control.inBackground(function () {
+            while (true) {
+                clockTimer()
+                basic.pause(20)
+            }
+        })
+        clockIsBeingSimulated = true //make sure we only start one fake master clock
+    }
+}
+
+/**
+ * This is a reporter block that returns a number
+ */
+//% block
+export function current_step(): number {
+    return currentStep;
+}
+
+//%blockID="setupSimClock" block="setup simulated clock with tempo = $simTempo and count to $simSeqLength"
+export function setupSimulatedClock(simTempo: number, simSeqLength: number){
+masterTempo = simTempo
+stepLengthms = 60000/masterTempo
+seqLength = simSeqLength
+}
 
     /**
      * inserts a pause to wait for tick
      */
 
-    //% blockId="MBORCH_waitForStep" block="wait for step number %step" 
+    //% blockId="MBORCH_waitForStep" block="wait for step number %step"
     //% weight=50
     export function waitFor(step: number) {
-        if(runningInSimulator){
-            extClock=0 /////HERE
+        if (runningInSimulator) {
+            extClock = 0
+            if(!clockIsBeingSimulated){
+                simulateClock()
+            }
+        } else {
+            extClock = 1
         }
-        extClock = 1
+
         waiting = true
         while (waiting) {
             basic.pause(1)
-            if (currentStep == step)
+            if (currentStep == step && newTick) {
                 waiting = false
-            waitForTimeSlot()
+                newTick = false
+            }
         }
+
+
+        let diff = input.runningTimeMicros() - tickReceivedTime
+        control.waitMicros((6000 - diff) + (1500 * microBitID))
     }
-
-
-
-
-
-
 
 
     /**
@@ -1634,16 +1666,24 @@ namespace OrchestraMusician {
         if (input.runningTime() >= lastClockTickTime + stepLengthms) {
             lastStep = currentStep
             lastClockTickTime = input.runningTime()
+            tickReceivedTime = input.runningTimeMicros()
             currentStep += 1
             //led.toggle(4, channelSelect)
             currentStep = currentStep % seqLength
             //handleLastStep()
-            handleStep()
+           if(sequencerExists){
+               handleStep()
+           }    
+            newTick = true
+
         }
     }
-
+    let tickReceivedTime = 0
+    let newTick = false
     function handleExtClock(tickType: string, receivedData: number) {
         if (tickType == "t") {
+            tickReceivedTime == input.runningTimeMicros()
+            newTick = true
             currentStep = receivedData + 1
             stepLengthms = input.runningTime() - lastClockTickTime
             if (sequencerExists) { //HERE
