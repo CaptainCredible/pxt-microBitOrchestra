@@ -634,9 +634,10 @@ namespace OrchestraInstrument {
                     }
                 }
 
-                if (receivedName == "m") {
-                    handleThumperMutes(value)
-                }
+            
+            }
+            if (receivedName == "m") {
+                handleThumperMutes(value)
             }
         })
         basic.showString(Name, 40)
