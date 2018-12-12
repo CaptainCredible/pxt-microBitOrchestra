@@ -7,6 +7,7 @@
  * added shake
  * Added thumper scoring
  * started improving waitforstep
+ * fixed microbitHero!
 */
 let scoreIsLocked = false
 let displayingScore = false
@@ -357,6 +358,26 @@ namespace OrchestraInstrument {
 
 
     function handleScore(nameReceived: string, valueReceived: number) {
+        if(nameReceived == "A"){
+            if (receivedPrematureA) {
+                myScore += 2
+                receivedPrematureA = false
+            } else {
+                ready4A = true
+                ready4Atimer = input.runningTime()
+            }
+        } else if (nameReceived == "B") {
+            if (receivedPrematureB) {
+                myScore += 2
+                receivedPrematureB = false
+            } else {
+                ready4B = true
+                ready4Btimer = input.runningTime()
+            }
+        } else if (nameReceived == "RESET"){
+
+        }
+
         if (nameReceived == InstrumentName) {
             if (valueReceived == 0) {
                 handleAscoring()
@@ -368,33 +389,7 @@ namespace OrchestraInstrument {
                 myScore = 0
             }
 
-        } else if (nameReceived == "Gam") { //if it is Game Master
-            if (valueReceived == 0) {
-                if (receivedPrematureA) {
-                    myScore += 2
-                    receivedPrematureA = false
-                } else {
-                    ready4A = true
-                    ready4Atimer = input.runningTime()
-                }
-            } else if (valueReceived == 2) {
-                if (receivedPrematureB) {
-                    myScore += 2
-                    receivedPrematureB = false
-                } else {
-                    ready4B = true
-                    ready4Btimer = input.runningTime()
-                }
-            } else if (valueReceived == 3) {
-                if (receivedPrematureRist) {
-                    myScore += 3
-                    receivedPrematureRist = false
-                } else {
-                    ready4Rist = true
-                    ready4RistTimer = input.runningTime()
-                }
-            }
-        }
+        } 
     }
 
     ///////
