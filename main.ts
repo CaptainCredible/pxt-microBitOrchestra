@@ -8,6 +8,8 @@
  * Added thumper scoring
  * started improving waitforstep
 */
+let scoreIsLocked = false
+let displayingScore = false
 let redirectLocalHW = false
 let myBunNumber = 0
 let myBunAction = 0
@@ -246,8 +248,11 @@ namespace OrchestraInstrument {
 
     function startGameTimers() {
         control.inBackground(function () {
+
             while (true) {
+
                 if (receivedPrematureA) {
+
                     if (input.runningTime() - prematureAtimer > slack) {
                         receivedPrematureA = false
                         // led.plot(2, 2)
@@ -302,15 +307,23 @@ namespace OrchestraInstrument {
         })
     }
 
+    function adjustScore(by: number) {
+        if (!scoreIsLocked) {
+            myScore += by
+        }
+
+    }
+
     function handleAscoring() {
         if (ready4A) {
-            myScore += 2
+            adjustScore(2)
+
             ready4A = false
         } else if (!receivedPrematureA) {
             receivedPrematureA = true
             prematureAtimer = input.runningTime()
         } else {
-            myScore--
+            adjustScore(-1)
             prematureAtimer = input.runningTime()
         }
     }
@@ -319,20 +332,20 @@ namespace OrchestraInstrument {
 
     function handleBscoring() {
         if (ready4B) {
-            myScore += 2
+            adjustScore(2)
             ready4B = false
         } else if (!receivedPrematureB) {
             receivedPrematureB = true
             prematureBtimer = input.runningTime()
         } else {
-            myScore--
+            adjustScore(-1)
             prematureBtimer = input.runningTime()
         }
     }
 
     function handleRistScoring() {
         if (ready4Rist) {
-            myScore += 3
+            adjustScore(3)
             ready4Rist = false
         } else if (!receivedPrematureRist) {
             receivedPrematureRist = true
@@ -601,6 +614,7 @@ namespace OrchestraInstrument {
      */
     //% blockId="MBORCH_Thumper" block="make a thumper with the name %Name"
     export function makeAThumper(Name: string): void {
+        InstrumentName = Name
         if (gameActivated) {
             startGameTimers()
         }
@@ -634,7 +648,7 @@ namespace OrchestraInstrument {
                     }
                 }
 
-            
+
             }
             if (receivedName == "m") {
                 handleThumperMutes(value)
@@ -651,7 +665,10 @@ namespace OrchestraInstrument {
 
 
         input.onButtonPressed(Button.AB, function () {
+            displayingScore = true
             basic.showNumber(myScore)
+            //basic.pause(500)
+            displayingScore = false
         })
     }
 
@@ -760,7 +777,9 @@ namespace OrchestraInstrument {
                         basic.pause(100)
                     }
                     */
-                led.plot(2, 4)
+                if (!displayingScore) {
+                    led.plot(2, 4)
+                }
                 basic.pause(100)
             }
         })
@@ -855,7 +874,217 @@ namespace OrchestraMusician {
         timeSlotMode = Type
     }
 
+    function showScore() {
 
+        if (!scoreIsLocked) {
+            myScore += 2 //compensate for having pressed 2 buttons to show score
+        }
+
+
+        scoreIsLocked = true
+        basic.showNumber(myScore)
+    }
+
+
+
+    function startMusicianGameTimers() {
+        control.inBackground(function () {
+            while (true) {
+
+                if (receivedPrematureA) {
+                    if (input.runningTime() - prematureAtimer > slack) {
+                        receivedPrematureA = false
+                        if (!scoreIsLocked) {
+                            myScore--
+                        }
+                    }
+                }
+
+                if (ready4A) {
+                    if (input.runningTime() - ready4Atimer > slack) {
+                        ready4A = false
+                        if (!scoreIsLocked) {
+                            myScore--
+                        }
+
+                    }
+                }
+
+                if (receivedPrematureB) {
+                    if (input.runningTime() - prematureBtimer > slack) {
+                        receivedPrematureB = false
+                        if (!scoreIsLocked) {
+                            myScore--
+                        }
+                    }
+                }
+
+                if (ready4B) {
+                    if (input.runningTime() - ready4Btimer > slack) {
+                        ready4B = false
+                        if (!scoreIsLocked) {
+                            myScore--
+                        }
+                    }
+                }
+
+                if (receivedPrematureRist) {
+                    if (input.runningTime() - prematureRistTimer > slack) {
+                        receivedPrematureRist = false
+                    }
+                }
+
+                if (ready4Rist) {
+                    if (input.runningTime() - ready4RistTimer > slack) {
+                        ready4Rist = false
+                    }
+                }
+                /*
+                                if (ledIsOn) {
+                                    if (input.runningTime() - ledTimer > slack) {
+                                        basic.clearScreen()
+                                        ledIsOn = false
+                                    }
+                                }
+                                */
+                basic.pause(10)
+            }
+        })
+    }
+    /**
+         * Controll the u:bit hero game
+         */
+
+    //%blockId="MBORCH_HeroMaster" block="control microBitHero $command" weight = 0 
+    //%advanced=true
+    export function gameMaster(command: string) {
+        radio.setGroup(84)
+        radio.sendString(command)
+    }
+
+    let ABOnTime = 0
+    let showScoreTimeDelay = 1000
+    //let MreceivedPrematureA = false
+    //let MreceivedPrematureB = false
+    //let MmyScore = 0
+    //let Mready4A = false
+    //let Mready4B = false
+
+    function MadjustScore(by: number) {
+        if (!scoreIsLocked) {
+            myScore += by
+        }
+    }
+
+    /**
+     * Starts the uBitOrchestraHero game, cannot be used together with setup as musician", "make a sequencer" or "wait for step"
+     */
+    //%blockId="MBORCH_Hero" block="play micro:bit orchestra hero $Type" weight = 0 
+    export function microbitOrchestraHero() {
+        gameActivated = true
+        radio.setGroup(84)
+        startMusicianGameTimers()
+        radio.onReceivedValue(function (name: string, value: number) {
+            if (name == "A") {
+                scoreIsLocked = false
+                if (receivedPrematureA) {
+                    receivedPrematureA = false
+                    MadjustScore(2)
+                } else {
+                    ready4A = true
+                    ready4Atimer = input.runningTime()
+                }
+            } else if (name == "B") {
+                scoreIsLocked = false
+                if (receivedPrematureB) {
+                    receivedPrematureB = false
+                    MadjustScore(2)
+                } else {
+                    ready4B = true
+                    ready4Btimer = input.runningTime()
+                }
+            } else if (name == "RESET") {
+                myScore = 0
+                scoreIsLocked = false
+                control.reset()
+            }
+        })
+
+        control.inBackground(function () {
+            while (true) {
+                if (input.buttonIsPressed(Button.AB)) {
+                    if (!ABWasPressed) {
+                        ABWasPressed = true
+                        ABOnTime = input.runningTime()
+                    } else {
+                        if (input.runningTime() - ABOnTime > showScoreTimeDelay) {
+                            showScore()
+                        }
+                    }
+                } else {
+                    ABWasPressed = false
+                }
+                basic.pause(20)
+            }
+        })
+
+
+    }
+
+    function handleMusicianGameAPressed() {
+        if (ready4A) {
+            ready4A = false
+            MadjustScore(2)
+        } else {
+            receivedPrematureA = true
+            prematureAtimer = input.runningTime()
+        }
+    }
+    function handleMusicianGameBPressed() {
+        if (ready4B) {
+            ready4B = false
+            MadjustScore(2)
+        } else {
+            receivedPrematureB = true
+            prematureBtimer = input.runningTime()
+        }
+    }
+    function handleMusicianGameRistet() {
+
+    }
+
+    /**
+         * Registers code to run when button A+B is held in for x milliseconds
+         */
+    //
+    //%block="when A+B is held in for $holdDuration milliseconds" weight=2
+    //%color=#D400D4 weight=70
+    //%holdDuration.defl=1000
+    export function onButtonABHeldFor(holdDuration: number, thing: Action) {
+        let funcABwasPressed = false
+        let funcABtimer = 0
+        let ABdone = false
+        control.inBackground(function () {
+            while (true) {
+                if (input.buttonIsPressed(Button.AB)) {
+                    if (!funcABwasPressed) {
+                        funcABwasPressed = true
+                        funcABtimer = input.runningTime()
+                    } else {
+                        if ((input.runningTime() - funcABtimer > holdDuration) && !ABdone) {
+                            control.raiseEvent(1999, 10)
+                            ABdone = true
+                        }
+                    }
+                } else {
+                    ABdone = false
+                    funcABwasPressed = false
+                }
+                basic.pause(buttonScanSpeed)
+            }
+        })
+        control.onEvent(1999, 10, thing);
+    }
 
     /**
      * Registers code to run when button A is pushed
@@ -867,8 +1096,12 @@ namespace OrchestraMusician {
         control.inBackground(function () {
             while (true) {
                 if (input.buttonIsPressed(Button.A) && !aWasPressed) {
+                    if (gameActivated) {
+                        handleMusicianGameAPressed()
+                    }
                     control.raiseEvent(1983, 10)
                     aWasPressed = true
+
                 } else if (!input.buttonIsPressed(Button.A)) {
                     aWasPressed = false
                 }
@@ -889,8 +1122,12 @@ namespace OrchestraMusician {
         control.inBackground(function () {
             while (true) {
                 if (input.buttonIsPressed(Button.B) && !bWasPressed) {
+                    if (gameActivated) {
+                        handleMusicianGameBPressed()
+                    }
                     control.raiseEvent(1984, 10)
                     bWasPressed = true
+
                 } else if (!input.buttonIsPressed(Button.B)) {
                     bWasPressed = false
                 }
