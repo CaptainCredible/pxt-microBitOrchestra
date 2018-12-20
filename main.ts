@@ -1825,7 +1825,7 @@ namespace OrchestraMusician {
     let pageOffset = 0
     function updatePage() {
         if (musicianIsMuted) {
-            basic.showIcon(IconNames.No)
+            basic.showIcon(IconNames.No,0)
         } else {
             actuallyUpdatePage()
         }
