@@ -102,6 +102,7 @@ let allowBlipsAndBloops = false //make blips and bloops in the sequencer
 let thumperIsMuted = false
 let waiting = false
 let nextClockTickTime = 0
+let globalPinOnTime = 16;
 ///
 ////
 ////
@@ -243,6 +244,15 @@ enum beepsOnOff {
 //% weight=100 color=#01bc11 icon=""
 //%blockId="OrchestraInstrument" block="Orchestra Instruments"
 namespace OrchestraInstrument {
+    /**
+     * Setup pin pulse duration
+     * @param how many milliseconds to keep the pin on
+     */
+    //% blockId="MBORCH_pulseDuration" block="set the pin pulse duration to $duration"
+    export function setPinPulseDuration(duration: number) {
+        globalPinOnTime = duration
+    }
+
 
     //GAME//
 
@@ -358,7 +368,7 @@ namespace OrchestraInstrument {
 
 
     function handleScore(nameReceived: string, valueReceived: number) {
-        if(nameReceived == "A"){
+        if (nameReceived == "A") {
             if (receivedPrematureA) {
                 myScore += 2
                 receivedPrematureA = false
@@ -374,7 +384,7 @@ namespace OrchestraInstrument {
                 ready4B = true
                 ready4Btimer = input.runningTime()
             }
-        } else if (nameReceived == "RESET"){
+        } else if (nameReceived == "RESET") {
 
         }
 
@@ -389,7 +399,7 @@ namespace OrchestraInstrument {
                 myScore = 0
             }
 
-        } 
+        }
     }
 
     ///////
@@ -420,7 +430,7 @@ namespace OrchestraInstrument {
         control.inBackground(() => {
             while (true) {
                 handleInstrumentOffs()
-                basic.pause(10)
+                basic.pause(2)
             }
         })
     }
@@ -462,13 +472,14 @@ namespace OrchestraInstrument {
     }
 
     function handleInstrumentPoly(dataToHandle: number) {  //this needs to be set up as a function that can be populated in block editor
-        let noteToHandle = 0 // parse bits here!! 
+        let noteToHandle = 0 // parse bits here!!
         let bitCheckMask = 1
         for (let i = 0; i <= 16; i++) {
-            if (bitCheckMask & dataToHandle) {
+            if (dataToHandle & (bitCheckMask << i)) {
                 noteToHandle = i
+                handleInstrumentOutputMode(noteToHandle)
+                //serial.writeValue("handled", noteToHandle)
             }
-            handleInstrumentOutputMode(noteToHandle)
         }
 
         if (outputMode > 0) {
@@ -506,7 +517,6 @@ namespace OrchestraInstrument {
     }
 
     function unTriggerPinOutput(PINoutputToUnTrigger: number) {
-
         onTimer[PINoutputToUnTrigger] = input.runningTime()
         outputIsOn[PINoutputToUnTrigger] = false
         pins.digitalWritePin(pinOutputRoutings[PINoutputToUnTrigger], 0)
@@ -518,7 +528,7 @@ namespace OrchestraInstrument {
     function handleInstrumentOffs(): void {
         for (let i = 0; i < numberOfOutputs; i++) {
             if (outputIsOn[i]) {
-                if (input.runningTime() - onTimer[i] > 10) {
+                if (input.runningTime() - onTimer[i] > globalPinOnTime) {
                     switch (outputMode) {
                         case 0: { //no automatic Handling of this stuff
                             break;
@@ -1825,7 +1835,7 @@ namespace OrchestraMusician {
     let pageOffset = 0
     function updatePage() {
         if (musicianIsMuted) {
-            basic.showIcon(IconNames.No,0)
+            basic.showIcon(IconNames.No, 0)
         } else {
             actuallyUpdatePage()
         }
