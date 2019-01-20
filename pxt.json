@@ -9,7 +9,9 @@
     "files": [
         "README.md",
         "main.ts",
-        "Testproj.ts"
+        "Testproj.ts",
+        "orchestraInstrument.ts",
+        "OrchestraMusician.ts"
     ],
     "testFiles": [
         "test.ts"
