@@ -130,6 +130,13 @@ enum timeSlotModes {
     allow_4_int = 4
 }
 
+enum thumperType {
+    //%block="without speaker"
+    withoutSpeaker = 0,
+    //%block="with speaker"
+    withSpeaker = 1,
+}
+
 enum internalExternal {
     //%block="external_clock"
     external_clock = 1,

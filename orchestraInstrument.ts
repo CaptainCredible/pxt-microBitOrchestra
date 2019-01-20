@@ -367,20 +367,30 @@ namespace OrchestraInstrument {
     }
 
 
-    function handleBun(num: number) {
+    function handleBun(num: number, Type: number) {
         if (num == myBunNumber) {
-            actuateThumper(myBunAction)
+            if(Type == 0){
+                actuateThumper(myBunAction)
+            } else {
+                generateThumperTones(num)
+            }
+            
         }
     }
 
+    let thumperType = 0
+    function generateThumperTones(tone: number) {
+        music.playTone(tone, 20)
+    }
     /**
      * Make a Thumper, a device that listens for one specific radio message and triggers one actuator on P0
      * @param Name
      * @param Number
      */
-    //% blockId="MBORCH_Thumper" block="make a thumper with the name %Name"
-    export function makeAThumper(Name: string): void {
+    //% blockId="MBORCH_Thumper" block="make a thumper $Type, with the name $Name"
+    export function makeAThumper(Name: string, Type: thumperType): void {
         InstrumentName = Name
+        thumperType = Type
         if (gameActivated) {
             startGameTimers()
         }
@@ -392,6 +402,8 @@ namespace OrchestraInstrument {
             if (!thumperIsMuted) {
                 if (receivedName == Name || receivedName == "Rab") {
                     actuateThumper(value)
+                } else if (((receivedName == Name + "T") || (receivedName == "RabT")) && thumperType == 1) {
+                    generateThumperTones(value)
                 } else if ((receivedName == Name + "P") || (receivedName == "RabP")) {
                     let myBitMask = 1
                     for (let i = 0; i < 16; i++) {
@@ -399,22 +411,34 @@ namespace OrchestraInstrument {
                             actuateThumper(i)
                         }
                     }
+                } else if (((receivedName == Name + "PT") || (receivedName == "RabPT")) && thumperType == 1) {
+                    let myBitMask = 1
+                    for (let i = 0; i < 16; i++) {
+                        if (value & (myBitMask << i)) {
+                            generateThumperTones(i)
+                        }
+                    }
                 } else if (bunSlave) {
-
                     if (receivedName == "Bun") {
-                        handleBun(value)
+                        handleBun(value,0)
+                    } else if (receivedName == "BunT") {
+                        handleBun(value,1)
                     } else if (receivedName == "BunP") {
-                        //led.toggleAll()
                         let myBitMask = 1
                         for (let i = 0; i < 16; i++) {
                             if (value & (myBitMask << i)) {
-                                handleBun(i)
+                                handleBun(i,0)
+                            }
+                        }
+                    } else if(receivedName == "BunPT"){
+                        let myBitMask = 1
+                        for (let i = 0; i < 16; i++) {
+                            if (value & (myBitMask << i)) {
+                                handleBun(i,1)
                             }
                         }
                     }
                 }
-
-
             }
             if (receivedName == "m") {
                 handleThumperMutes(value)
