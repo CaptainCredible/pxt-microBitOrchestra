@@ -1,6 +1,6 @@
 {
     "name": "pxt-microbitorchestra",
-    "version": "0.3.30",
+    "version": "0.3.31",
     "description": "",
     "dependencies": {
         "core": "*",
