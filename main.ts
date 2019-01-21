@@ -9,6 +9,8 @@
  * started improving waitforstep
  * fixed microbitHero!
 */
+
+let thumpPin = DigitalPin.P0
 let scoreIsLocked = false
 let displayingScore = false
 let redirectLocalHW = false
@@ -91,6 +93,7 @@ let lastStep = seqLength
 let channelSelect = 0
 let channelOutNames: string[] = ["Bob", "Tim", "Pat", "Liz"]
 let channelOutNotes: number[] = [0, 1, 2, 3]
+let noteFreq: number[] = [131, 139, 147, 156, 165, 175, 185, 196, 208, 220, 233, 247, 262, 277, 294, 311, 330, 349, 370, 392, 415, 440, 466, 494, 523, 555, 587, 622, 659, 698, 740, 784, 831, 880, 932, 988]
 let outPutToTrigger = 0
 let bWasPressed = false
 let aWasPressed = false

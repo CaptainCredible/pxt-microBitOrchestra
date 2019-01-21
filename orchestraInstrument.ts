@@ -369,18 +369,18 @@ namespace OrchestraInstrument {
 
     function handleBun(num: number, Type: number) {
         if (num == myBunNumber) {
-            if(Type == 0){
+            if (Type == 0) {
                 actuateThumper(myBunAction)
             } else {
                 generateThumperTones(num)
             }
-            
+
         }
     }
 
     let thumperType = 0
     function generateThumperTones(tone: number) {
-        music.playTone(tone, 20)
+        music.playTone(noteFreq[tone % 36], 20)
     }
     /**
      * Make a Thumper, a device that listens for one specific radio message and triggers one actuator on P0
@@ -411,7 +411,7 @@ namespace OrchestraInstrument {
                             actuateThumper(i)
                         }
                     }
-                } else if (((receivedName == Name + "PT") || (receivedName == "RabPT")) && thumperType == 1) {
+                } else if (((receivedName == Name + "TP") || (receivedName == "RabTP")) && thumperType == 1) {
                     let myBitMask = 1
                     for (let i = 0; i < 16; i++) {
                         if (value & (myBitMask << i)) {
@@ -420,21 +420,21 @@ namespace OrchestraInstrument {
                     }
                 } else if (bunSlave) {
                     if (receivedName == "Bun") {
-                        handleBun(value,0)
+                        handleBun(value, 0)
                     } else if (receivedName == "BunT") {
-                        handleBun(value,1)
+                        handleBun(value, 1)
                     } else if (receivedName == "BunP") {
                         let myBitMask = 1
                         for (let i = 0; i < 16; i++) {
                             if (value & (myBitMask << i)) {
-                                handleBun(i,0)
+                                handleBun(i, 0)
                             }
                         }
-                    } else if(receivedName == "BunPT"){
+                    } else if (receivedName == "BunPT") {
                         let myBitMask = 1
                         for (let i = 0; i < 16; i++) {
                             if (value & (myBitMask << i)) {
-                                handleBun(i,1)
+                                handleBun(i, 1)
                             }
                         }
                     }
@@ -463,11 +463,11 @@ namespace OrchestraInstrument {
     }
 
     function actuateThumper(activityType: number) {
-        //led.unplot(0, activityType)
-        //led.unplot(1, activityType)
-        //led.unplot(2, activityType)
-        //led.unplot(3, activityType)
-        //led.unplot(4, activityType)
+        if (thumperType == 0) {
+            thumpPin = DigitalPin.P0
+        } else {
+            thumpPin = DigitalPin.P1
+        }
 
         switch (activityType) {
 
@@ -479,13 +479,13 @@ namespace OrchestraInstrument {
     . # . # .
     . # . # .
     `, 0)
-                pins.digitalWritePin(DigitalPin.P0, 1)
+                pins.digitalWritePin(thumpPin, 1)
                 control.waitMicros(10000);
-                pins.digitalWritePin(DigitalPin.P0, 0)
+                pins.digitalWritePin(thumpPin, 0)
                 control.waitMicros(10000);
-                pins.digitalWritePin(DigitalPin.P0, 1)
+                pins.digitalWritePin(thumpPin, 1)
                 control.waitMicros(10000);
-                pins.digitalWritePin(DigitalPin.P0, 0)
+                pins.digitalWritePin(thumpPin, 0)
                 control.waitMicros(10000);
 
 
@@ -501,10 +501,10 @@ namespace OrchestraInstrument {
     # . # . #
     # . # . #
     `, 0)
-                    pins.digitalWritePin(DigitalPin.P0, 1)
+                    pins.digitalWritePin(thumpPin, 1)
                     control.waitMicros(5000)
                     led.toggleAll()
-                    pins.digitalWritePin(DigitalPin.P0, 0)
+                    pins.digitalWritePin(thumpPin, 0)
                     control.waitMicros(6000)
                 }
                 break;
@@ -513,11 +513,11 @@ namespace OrchestraInstrument {
 
                 for (let i = 0; i <= 6 - 1; i++) {
                     led.plotAll()
-                    pins.digitalWritePin(DigitalPin.P0, 1)
+                    pins.digitalWritePin(thumpPin, 1)
                     basic.pause(5)
                     basic.clearScreen()
                     //control.waitMicros(4000)
-                    pins.digitalWritePin(DigitalPin.P0, 0)
+                    pins.digitalWritePin(thumpPin, 0)
                     basic.pause((i + 1) * 5)
                     //control.waitMicros((i + 1) * 5000)
                 }
@@ -532,15 +532,15 @@ namespace OrchestraInstrument {
     # # # # #
     # # # # #
     `, 0)
-                pins.digitalWritePin(DigitalPin.P0, 1)
+                pins.digitalWritePin(thumpPin, 1)
                 basic.pause(5)
-                pins.digitalWritePin(DigitalPin.P0, 0)
+                pins.digitalWritePin(thumpPin, 0)
                 basic.pause(10)
                 break;
             }
         }
 
-        pins.digitalWritePin(DigitalPin.P0, 0)
+        pins.digitalWritePin(thumpPin, 0)
         basic.clearScreen()
     }
 
