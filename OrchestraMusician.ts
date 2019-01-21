@@ -147,7 +147,8 @@ namespace OrchestraMusician {
             } else if (name == "RESET") {
                 myScore = 0
                 scoreIsLocked = false
-                control.reset()
+                music.playTone(800, 500)
+                //control.reset()
             }
         })
 
