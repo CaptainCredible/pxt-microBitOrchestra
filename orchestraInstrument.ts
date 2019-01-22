@@ -13,7 +13,7 @@ namespace OrchestraInstrument {
     export function setPinPulseDuration(duration: number) {
         globalPinOnTime = duration
     }
-//
+
 
     //GAME//
 
@@ -396,9 +396,9 @@ namespace OrchestraInstrument {
         }
         radio.setGroup(83)
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
-            if (gameActivated) {
-                handleScore(receivedName, value)
-            }
+            //if (gameActivated) {
+            //    handleScore(receivedName, value)
+            //} // No game on thumper, game moved to musician
             if (!thumperIsMuted) {
                 if (receivedName == Name || receivedName == "Rab") {
                     actuateThumper(value)
@@ -440,8 +440,20 @@ namespace OrchestraInstrument {
                     }
                 }
             }
+
+
             if (receivedName == "m") {
                 handleThumperMutes(value)
+            }
+
+            if (receivedName == "thump") {
+                basic.clearScreen()
+                if (value == 0) {
+                    allowThumping = false
+                } else {
+                    allowThumping = true
+   
+                }
             }
         })
         basic.showString(Name, 40)
@@ -468,8 +480,25 @@ namespace OrchestraInstrument {
         } else {
             thumpPin = DigitalPin.P1
         }
+        if (!allowThumping) {
+            thumpPin = DigitalPin.P0
+        }
 
         switch (activityType) {
+            case 0: {
+                basic.showLeds(`
+    . . . . .
+    . . . . .
+    . . . . .
+    # # # # #
+    # # # # #
+    `, 0)
+                pins.digitalWritePin(thumpPin, 1)
+                basic.pause(5)
+                pins.digitalWritePin(thumpPin, 0)
+                basic.pause(10)
+                break;
+            }
 
             case 1: {
                 basic.showLeds(`
@@ -525,17 +554,23 @@ namespace OrchestraInstrument {
             }
 
             default: {
-                basic.showLeds(`
+                if (thumperType == 1) {
+                    generateThumperTones(activityType);
+                } else {
+                    basic.showLeds(`
     . . . . .
     . . . . .
     . . . . .
     # # # # #
     # # # # #
     `, 0)
-                pins.digitalWritePin(thumpPin, 1)
-                basic.pause(5)
-                pins.digitalWritePin(thumpPin, 0)
-                basic.pause(10)
+                    pins.digitalWritePin(thumpPin, 1)
+                    basic.pause(5)
+                    pins.digitalWritePin(thumpPin, 0)
+                    basic.pause(10)
+
+                }
+
                 break;
             }
         }
@@ -568,7 +603,11 @@ namespace OrchestraInstrument {
                     }
                     */
                 if (!displayingScore) {
-                    led.plot(2, 4)
+                    if (allowThumping) {
+                        led.plot(2, 4)
+                    } else {
+                        led.plot(2, 3)
+                    }
                 }
                 basic.pause(100)
             }

@@ -9,7 +9,7 @@
  * started improving waitforstep
  * fixed microbitHero!
 */
-
+let allowThumping = true
 let thumpPin = DigitalPin.P0
 let scoreIsLocked = false
 let displayingScore = false
@@ -163,6 +163,13 @@ enum metronomeNoYes {
     no_thanks = 0,
     //%block="yes_please"
     yes_please = 1
+}
+
+enum onOff {
+    //%block="on"
+    on = 1,
+    //%block="off"
+    off = 0
 }
 
 enum bunSolactions {
@@ -359,6 +366,14 @@ namespace OrchestraConductor {
         }
     }
 
+    /**
+         * Retrigger the master clock back to 0
+         */
+    //% block advanced=true
+    //% blockId="MBORCH-thumpOnOff" "turn thumps on or off"
+    export function turnThump(onOff: onOff) {
+    OrchestraMusician.send(onOff, "thump")
+    }
 
     /**
      * Setup this microbit as the master clock
