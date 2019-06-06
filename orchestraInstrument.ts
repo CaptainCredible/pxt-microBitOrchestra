@@ -475,7 +475,7 @@ namespace OrchestraInstrument {
     }
 
     function actuateThumper(activityType: number) {
-        if (thumperType == 0) {
+        if (thumperType == 0) { 
             thumpPin = DigitalPin.P0
         } else {
             thumpPin = DigitalPin.P1
