@@ -391,9 +391,18 @@ namespace OrchestraInstrument {
     export function makeAThumper(Name: string, Type: thumperType): void {
         InstrumentName = Name
         thumperType = Type
-        if (gameActivated) {
-            startGameTimers()
-        }
+        //if (gameActivated) {
+         //   startGameTimers()
+        //}
+let selex=0
+        OrchestraMusician.onButtonAPressed(function () {
+            actuateThumper(selex)
+        })
+        OrchestraMusician.onButtonBPressed(function () {
+            selex++
+            if(selex>4)selex=0
+        })
+
         radio.setGroup(83)
         radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
             //if (gameActivated) {
@@ -550,6 +559,21 @@ namespace OrchestraInstrument {
                     basic.pause((i + 1) * 5)
                     //control.waitMicros((i + 1) * 5000)
                 }
+                break;
+            }
+            case 4: {
+
+                basic.showLeds(`
+    . . # . .
+    . # # # .
+    # # # # #
+    . # # # .
+    . . # . .
+    `, 0)
+                pins.digitalWritePin(DigitalPin.P2, 1)
+                basic.pause(globalPinOnTime)
+                pins.digitalWritePin(DigitalPin.P2, 0)
+                basic.pause(globalPinOnTime)    
                 break;
             }
 
