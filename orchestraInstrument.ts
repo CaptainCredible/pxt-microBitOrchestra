@@ -394,7 +394,7 @@ namespace OrchestraInstrument {
         //if (gameActivated) {
          //   startGameTimers()
         //}
-let selex=0
+let selex=0 //
         OrchestraMusician.onButtonAPressed(function () {
             actuateThumper(selex)
         })
