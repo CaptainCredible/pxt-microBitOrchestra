@@ -1,7 +1,7 @@
 # pxt-microbitorchestra
 
 [![microbitOrchestra](https://img.youtube.com/vi/5tX93t7jCbQ/0.jpg)](https://www.youtube.com/watch?v=5tX93t7jCbQ)
-click above for video. 
+<-- click for video. 
 
 This is a makecode extension for setting up a micro:bit to take part in a micro:bit orchestra. Your microbit can have the role of either conductor, musician or instrument. 
 
