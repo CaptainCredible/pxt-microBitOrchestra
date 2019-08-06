@@ -1,6 +1,6 @@
 # pxt-microbitorchestra
 
-[![microbitORchestra](https://www.youtube.com/watch?v=5tX93t7jCbQ/0.jpg)](https://www.youtube.com/watch?v=5tX93t7jCbQ)
+[![microbitORchestra](https://img.youtube.com/watch?v=5tX93t7jCbQ/0.jpg)](https://www.youtube.com/watch?v=5tX93t7jCbQ)
 
 
 ## TODO
