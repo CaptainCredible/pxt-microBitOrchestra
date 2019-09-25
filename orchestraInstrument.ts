@@ -174,7 +174,8 @@ namespace OrchestraInstrument {
         radio.setGroup(83)
         isInstrument = true
         InstrumentName = withName
-        radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
+
+        radio.onReceivedValue(function (receivedName: string, value: number) {
             led.toggle(2, 2)
             // here we need to distinguish between normal and Poly
             if (receivedName == InstrumentName) {
@@ -404,7 +405,8 @@ let selex=0 //
         })
 
         radio.setGroup(83)
-        radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
+
+        radio.onReceivedValue(function (receivedName: string, value: number) {
             //if (gameActivated) {
             //    handleScore(receivedName, value)
             //} // No game on thumper, game moved to musician
@@ -648,7 +650,8 @@ let selex=0 //
     //% blockId="MBORCH_groupedThumper" block="make a grouped thumper with the number $Number in the group $GroupName" weight=100
     export function makeAGroupedThumper(GroupName: string, Number: number): void {
         radio.setGroup(83)
-        radio.onDataPacketReceived(({ receivedString: receivedName, receivedNumber: value }) => {
+        
+        radio.onReceivedValue(function (receivedName: string, value: number) {
             if (receivedName == "m") {
                 handleThumperMutes(value)
             }

@@ -941,7 +941,10 @@ namespace OrchestraMusician {
                 handleMusicianSolos(1337)
             } else if (msgID == "mum") {//this will unmute one
                 handleMusicianMutes(receivedData, false)
+            } else if (msgID == "win") {//Set the radiosend window duration
+                radioSendWindow = receivedData   
             }
+
         })
         basic.showNumber(microBitID, 0)
 

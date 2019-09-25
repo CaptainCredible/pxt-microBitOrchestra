@@ -17,5 +17,6 @@
         "test.ts"
     ],
     "public": false,
-    "installedVersion": "workspace:abb877e6-1974-417d-f362-4fc2bff575ca"
+    "installedVersion": "workspace:30b1d007-1051-404c-b5cd-034a05eaf55e",
+    "preferredEditor": "tsprj"
 }
