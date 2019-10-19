@@ -282,7 +282,7 @@ namespace OrchestraMusician {
          * Registers code to run when input 2 is pulled over 500
          */
     //
-    //%block="when p0 and 3V is touched - sensitivity $threshHold" weight=8
+    //%block="when p0 and 3V is touched - threshold $threshHold" weight=8
     //%color=#D400D4 weight=8
     //%threshHold.defl=500
     export function onP2Touched(threshHold: number, thing: Action) {
