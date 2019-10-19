@@ -244,8 +244,9 @@ namespace OrchestraMusician {
                 if ((pinVal > (1023 - threshHold)) && !p0wasOn) {
                     control.raiseEvent(1990, 10)
                     p0wasOn = true
-                } else if (pinVal < (1023 - threshHold)) {
+                } else if ((pinVal < (1023 - threshHold)) && p0wasOn) {
                     p0wasOn = false
+                    control.raiseEvent(1991, 10)
                 }
                 basic.pause(buttonScanSpeed)
             }
@@ -269,8 +270,9 @@ namespace OrchestraMusician {
                 if ((pinVal > (1023 - threshHold)) && !p1wasOn) {
                     control.raiseEvent(1990, 20)
                     p1wasOn = true
-                } else if (pinVal < (1023 - threshHold)) {
+                } else if ((pinVal < (1023 - threshHold))&& p1wasOn) {
                     p1wasOn = false
+                    control.raiseEvent(1991, 20)
                 }
                 basic.pause(buttonScanSpeed)
             }
@@ -282,7 +284,7 @@ namespace OrchestraMusician {
          * Registers code to run when input 2 is pulled over 500
          */
     //
-    //%block="when p0 and 3V is touched - threshold $threshHold" weight=8
+    //%block="when p2 and 3V is touched - threshold $threshHold" weight=8
     //%color=#D400D4 weight=8
     //%threshHold.defl=500
     export function onP2Touched(threshHold: number, thing: Action) {
@@ -294,8 +296,9 @@ namespace OrchestraMusician {
                 if ((pinVal > (1023 - threshHold)) && !p2wasOn) {
                     control.raiseEvent(1990, 30)
                     p2wasOn = true
-                } else if (pinVal < (1023 - threshHold)) {
+                } else if ((pinVal < (1023 - threshHold)) && p2wasOn) {
                     p2wasOn = false
+                    control.raiseEvent(1991, 30)
                 }
                 basic.pause(buttonScanSpeed)
             }
@@ -303,7 +306,39 @@ namespace OrchestraMusician {
         control.onEvent(1990, 30, thing);
     }
 
-    
+    /**
+         * Registers code to run when input 2 is released
+         */
+    //
+    //%block="when p2 and 3V is released" weight=5
+    //%color=#D400D4 weight=5
+
+    export function onP2Released(thing: Action) {
+        control.onEvent(1991, 30, thing);
+    }
+
+    /**
+     * Registers code to run when input 1 is released
+     */
+    //
+    //%block="when p1 and 3V is released" weight=6
+    //%color=#D400D4 weight=5
+
+    export function onP1Released(thing: Action) {
+        control.onEvent(1991, 20, thing);
+    }
+
+    /**
+     * Registers code to run when input 0 is released
+     */
+    //
+    //%block="when p0 and 3V is released" weight=7
+    //%color=#D400D4 weight=5
+
+    export function onP0Released(thing: Action) {
+        control.onEvent(1991, 10, thing);
+    }
+
     /**
      * Registers code to run when button A is pushed
      */
