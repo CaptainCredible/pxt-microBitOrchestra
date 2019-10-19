@@ -922,7 +922,8 @@ namespace OrchestraMusician {
         radio.setGroup(84) // tempo and clock ticks will be sent on radio group 84
         microBitID = withID
         isInstrument = false
-        radio.onDataPacketReceived(({ receivedString: msgID, receivedNumber: receivedData }) => {
+        //radio.onDataPacketReceived(({ receivedString: msgID, receivedNumber: receivedData }) => {
+        radio.onReceivedValue(function (msgID: string, receivedData: number) {
             if (auto) {
                 extClock = 1
                 auto = false
@@ -944,7 +945,6 @@ namespace OrchestraMusician {
             } else if (msgID == "win") {//Set the radiosend window duration
                 radioSendWindow = receivedData   
             }
-
         })
         basic.showNumber(microBitID, 0)
 
