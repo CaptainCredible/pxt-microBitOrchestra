@@ -120,6 +120,15 @@ if (pins.digitalReadPin(DigitalPin.P20)) {
 
 
 
+enum myTouchPins{
+    //%block="p0"
+    p0 = 7,
+    //%block="p1"
+    p1 = 8,
+    //%block="p2"
+    p2 = 9
+}
+
 enum timeSlotModes {
     //%block="legacy"
     legacy = 0,

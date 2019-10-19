@@ -229,6 +229,82 @@ namespace OrchestraMusician {
     }
 
     /**
+         * Registers code to run when input 0 is pulled over 500
+         */
+    //
+    //%block="when p0 and 3V is touched - sensitivity $threshHold" weight=90
+    //%color=#D400D4 weight=10
+    //%threshHold.defl=500
+    export function onP0Touched(threshHold: number, thing: Action) {
+        control.inBackground(function () {
+            let p0wasOn = false
+            pins.setPull(DigitalPin.P0, PinPullMode.PullDown)
+            while (true) {
+                let pinVal = pins.analogReadPin(AnalogPin.P0)
+                if ((pinVal > (1023 - threshHold)) && !p0wasOn) {
+                    control.raiseEvent(1990, 10)
+                    p0wasOn = true
+                } else if (pinVal < (1023 - threshHold)) {
+                    p0wasOn = false
+                }
+                basic.pause(buttonScanSpeed)
+            }
+        })
+        control.onEvent(1990, 10, thing);
+    }
+
+    /**
+         * Registers code to run when input 1 is pulled over 500
+         */
+    //
+    //%block="when p1 and 3V is touched - sensitivity $threshHold" weight=90
+    //%color=#D400D4 weight=9
+    //%threshHold.defl=500
+    export function onP1Touched(threshHold: number, thing: Action) {
+        control.inBackground(function () {
+            let p1wasOn = false
+            pins.setPull(DigitalPin.P1, PinPullMode.PullDown)
+            while (true) {
+                let pinVal = pins.analogReadPin(AnalogPin.P1)
+                if ((pinVal > (1023 - threshHold)) && !p1wasOn) {
+                    control.raiseEvent(1990, 20)
+                    p1wasOn = true
+                } else if (pinVal < (1023 - threshHold)) {
+                    p1wasOn = false
+                }
+                basic.pause(buttonScanSpeed)
+            }
+        })
+        control.onEvent(1990, 20, thing);
+    }
+
+    /**
+         * Registers code to run when input 2 is pulled over 500
+         */
+    //
+    //%block="when p0 and 3V is touched - sensitivity $threshHold" weight=8
+    //%color=#D400D4 weight=8
+    //%threshHold.defl=500
+    export function onP2Touched(threshHold: number, thing: Action) {
+        control.inBackground(function () {
+            let p2wasOn = false
+            pins.setPull(DigitalPin.P2, PinPullMode.PullDown)
+            while (true) {
+                let pinVal = pins.analogReadPin(AnalogPin.P2)
+                if ((pinVal > (1023 - threshHold)) && !p2wasOn) {
+                    control.raiseEvent(1990, 30)
+                    p2wasOn = true
+                } else if (pinVal < (1023 - threshHold)) {
+                    p2wasOn = false
+                }
+                basic.pause(buttonScanSpeed)
+            }
+        })
+        control.onEvent(1990, 30, thing);
+    }
+
+    
+    /**
      * Registers code to run when button A is pushed
      */
     //
@@ -943,7 +1019,7 @@ namespace OrchestraMusician {
             } else if (msgID == "mum") {//this will unmute one
                 handleMusicianMutes(receivedData, false)
             } else if (msgID == "win") {//Set the radiosend window duration
-                radioSendWindow = receivedData   
+                radioSendWindow = receivedData
             }
         })
         basic.showNumber(microBitID, 0)
