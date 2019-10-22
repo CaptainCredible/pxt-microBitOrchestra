@@ -232,7 +232,7 @@ namespace OrchestraMusician {
          * Registers code to run when input 0 is pulled over 500
          */
     //
-    //%block="when p0 and 3V is touched - sensitivity $threshHold" weight=90
+    //%block="when p0 and 3V is touched - threshhold $threshHold" weight=90
     //%color=#D400D4 weight=10
     //%threshHold.defl=500
     export function onP0Touched(threshHold: number, thing: Action) {
@@ -242,6 +242,9 @@ namespace OrchestraMusician {
             while (true) {
                 let pinVal = pins.analogReadPin(AnalogPin.P0)
                 if ((pinVal > (1023 - threshHold)) && !p0wasOn) {
+                    if (gameActivated) {
+                        handleMusicianGameAPressed()
+                    }
                     control.raiseEvent(1990, 10)
                     p0wasOn = true
                 } else if ((pinVal < (1023 - threshHold)) && p0wasOn) {
@@ -258,7 +261,7 @@ namespace OrchestraMusician {
          * Registers code to run when input 1 is pulled over 500
          */
     //
-    //%block="when p1 and 3V is touched - sensitivity $threshHold" weight=90
+    //%block="when p1 and 3V is touched - threshhold $threshHold" weight=90
     //%color=#D400D4 weight=9
     //%threshHold.defl=500
     export function onP1Touched(threshHold: number, thing: Action) {
@@ -270,7 +273,7 @@ namespace OrchestraMusician {
                 if ((pinVal > (1023 - threshHold)) && !p1wasOn) {
                     control.raiseEvent(1990, 20)
                     p1wasOn = true
-                } else if ((pinVal < (1023 - threshHold))&& p1wasOn) {
+                } else if ((pinVal < (1023 - threshHold)) && p1wasOn) {
                     p1wasOn = false
                     control.raiseEvent(1991, 20)
                 }
@@ -284,7 +287,7 @@ namespace OrchestraMusician {
          * Registers code to run when input 2 is pulled over 500
          */
     //
-    //%block="when p2 and 3V is touched - threshold $threshHold" weight=8
+    //%block="when p2 and 3V is touched - threshhold $threshHold" weight=8
     //%color=#D400D4 weight=8
     //%threshHold.defl=500
     export function onP2Touched(threshHold: number, thing: Action) {
@@ -294,6 +297,9 @@ namespace OrchestraMusician {
             while (true) {
                 let pinVal = pins.analogReadPin(AnalogPin.P2)
                 if ((pinVal > (1023 - threshHold)) && !p2wasOn) {
+                    if (gameActivated) {
+                        handleMusicianGameBPressed()
+                    }
                     control.raiseEvent(1990, 30)
                     p2wasOn = true
                 } else if ((pinVal < (1023 - threshHold)) && p2wasOn) {
@@ -928,10 +934,10 @@ namespace OrchestraMusician {
             allowBleeps = 0
         }
         makeAnAdvancedSequencer(NumberOfSteps, internalExternal.autorun_in_simulator, 40, metronomeNoYes.no_thanks, allowBleeps)
-        setUpTrackRouting(channels.one, masterName, note1)
-        setUpTrackRouting(channels.two, masterName, note2)
-        setUpTrackRouting(channels.three, masterName, note3)
-        setUpTrackRouting(channels.four, masterName, note4)
+        setUpTrackRouting(channels.one, masterName, note1 % 16)
+        setUpTrackRouting(channels.two, masterName, note2 % 16)
+        setUpTrackRouting(channels.three, masterName, note3 % 16)
+        setUpTrackRouting(channels.four, masterName, note4 % 16)
         control.inBackground(function () {
             while (true) {
                 basic.pause(20)
