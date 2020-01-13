@@ -342,7 +342,7 @@ namespace OrchestraInstrument {
         Zim         10000000
         thumpers   100000000
         */
-        if ((muteInt & 0b00010000) || (muteInt & 0b100000000)) {
+        if (muteInt & 0b100000000) {
             if (!thumperIsMuted) {
                 basic.showIcon(IconNames.No, 0)
             }
@@ -362,7 +362,7 @@ namespace OrchestraInstrument {
         bunSlave = true
         myBunNumber = bunNumber
         myBunAction = solAction
-        if (solAction == 4) {
+        if (solAction >= 4) {
             myBunAction = myBunNumber % 4
         }
     }
@@ -376,6 +376,8 @@ namespace OrchestraInstrument {
                 generateThumperTones(num)
             }
 
+        } else if (num ==myBunNumber + 1){
+            actuateThumper(myBunAction+1)
         }
     }
 
@@ -389,6 +391,7 @@ namespace OrchestraInstrument {
      * @param Number
      */
     //% blockId="MBORCH_Thumper" block="make a thumper $Type, with the name $Name"
+    thumpBpin = DigitalPin.P2
     export function makeAThumper(Name: string, Type: thumperType): void {
         InstrumentName = Name
         thumperType = Type
@@ -403,6 +406,11 @@ let selex=0 //
             selex++
             if(selex>4)selex=0
         })
+        input.onButtonPressed(Button.AB, function () {
+            dualThumpMode = !dualThumpMode
+            basic.clearScreen()
+        })
+   
 
         radio.setGroup(83)
 
@@ -476,15 +484,16 @@ let selex=0 //
             basic.showIcon(IconNames.No, 1)
         }
 
-
+/*
         input.onButtonPressed(Button.AB, function () {
             displayingScore = true
             basic.showNumber(myScore)
             //basic.pause(500)
             displayingScore = false
         })
+        */
     }
-
+    
     function actuateThumper(activityType: number) {
         if (thumperType == 0) { 
             thumpPin = DigitalPin.P0
@@ -493,6 +502,7 @@ let selex=0 //
         }
         if (!allowThumping) {
             thumpPin = DigitalPin.P0
+            thumpBpin = DigitalPin.P0
         }
 
         switch (activityType) {
@@ -519,14 +529,23 @@ let selex=0 //
     . # . # .
     . # . # .
     `, 0)
-                pins.digitalWritePin(thumpPin, 1)
-                control.waitMicros(10000);
-                pins.digitalWritePin(thumpPin, 0)
-                control.waitMicros(10000);
-                pins.digitalWritePin(thumpPin, 1)
-                control.waitMicros(10000);
-                pins.digitalWritePin(thumpPin, 0)
-                control.waitMicros(10000);
+    if(!dualThumpMode){
+        pins.digitalWritePin(thumpPin, 1)
+        control.waitMicros(10000);
+        pins.digitalWritePin(thumpPin, 0)
+        control.waitMicros(10000);
+        pins.digitalWritePin(thumpPin, 1)
+        control.waitMicros(10000);
+        pins.digitalWritePin(thumpPin, 0)
+        control.waitMicros(10000);
+    } else {
+        pins.digitalWritePin(thumpBpin, 1)
+        control.waitMicros(10000);
+        pins.digitalWritePin(thumpBpin, 0)
+        control.waitMicros(10000);
+ 
+    }
+        
 
 
                 break;
@@ -550,14 +569,19 @@ let selex=0 //
                 break;
             }
             case 3: {
-
+                let tempThumpPin = 0
+                if(!dualThumpMode){
+                    tempThumpPin = thumpPin
+                } else {
+                    tempThumpPin = thumpBpin
+                }
                 for (let i = 0; i <= 6 - 1; i++) {
                     led.plotAll()
-                    pins.digitalWritePin(thumpPin, 1)
+                    pins.digitalWritePin(tempThumpPin, 1)
                     basic.pause(5)
                     basic.clearScreen()
                     //control.waitMicros(4000)
-                    pins.digitalWritePin(thumpPin, 0)
+                    pins.digitalWritePin(tempThumpPin, 0)
                     basic.pause((i + 1) * 5)
                     //control.waitMicros((i + 1) * 5000)
                 }
@@ -572,6 +596,7 @@ let selex=0 //
     . # # # .
     . . # . .
     `, 0)
+    
                 pins.digitalWritePin(DigitalPin.P2, 1)
                 basic.pause(globalPinOnTime)
                 pins.digitalWritePin(DigitalPin.P2, 0)
@@ -630,7 +655,11 @@ let selex=0 //
                     */
                 if (!displayingScore) {
                     if (allowThumping) {
-                        led.plot(2, 4)
+                        if(!dualThumpMode){led.plot(2, 4)
+                        } else {
+                            led.plot(1, 4)
+                            led.plot(3, 4)
+                        }
                     } else {
                         led.plot(2, 3)
                     }

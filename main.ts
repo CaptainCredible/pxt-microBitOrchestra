@@ -17,6 +17,8 @@ let redirectLocalHW = false
 let myBunNumber = 0
 let myBunAction = 0
 let bunSlave = false
+let dualThumpMode = false
+let thumpBpin = 0
 
 let gameActivated = true
 let receivedPrematureA = false
