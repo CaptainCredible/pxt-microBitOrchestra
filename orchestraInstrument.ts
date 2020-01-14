@@ -376,8 +376,8 @@ namespace OrchestraInstrument {
                 generateThumperTones(num)
             }
 
-        } else if (num ==myBunNumber + 1){
-            actuateThumper(myBunAction+1)
+        } else if (num == myBunNumber + 1) {
+            actuateThumper(myBunAction + 1)
         }
     }
 
@@ -385,32 +385,33 @@ namespace OrchestraInstrument {
     function generateThumperTones(tone: number) {
         music.playTone(noteFreq[tone % 36], 20)
     }
+
     /**
      * Make a Thumper, a device that listens for one specific radio message and triggers one actuator on P0
      * @param Name
      * @param Number
      */
     //% blockId="MBORCH_Thumper" block="make a thumper $Type, with the name $Name"
-    thumpBpin = DigitalPin.P2
     export function makeAThumper(Name: string, Type: thumperType): void {
+        thumpBpin = DigitalPin.P2
         InstrumentName = Name
         thumperType = Type
         //if (gameActivated) {
-         //   startGameTimers()
+        //   startGameTimers()
         //}
-let selex=0 //
+        let selex = 0 //
         OrchestraMusician.onButtonAPressed(function () {
             actuateThumper(selex)
         })
         OrchestraMusician.onButtonBPressed(function () {
             selex++
-            if(selex>4)selex=0
+            if (selex > 4) selex = 0
         })
         input.onButtonPressed(Button.AB, function () {
             dualThumpMode = !dualThumpMode
             basic.clearScreen()
         })
-   
+
 
         radio.setGroup(83)
 
@@ -471,7 +472,7 @@ let selex=0 //
                     allowThumping = false
                 } else {
                     allowThumping = true
-   
+
                 }
             }
         })
@@ -484,18 +485,18 @@ let selex=0 //
             basic.showIcon(IconNames.No, 1)
         }
 
-/*
-        input.onButtonPressed(Button.AB, function () {
-            displayingScore = true
-            basic.showNumber(myScore)
-            //basic.pause(500)
-            displayingScore = false
-        })
-        */
+        /*
+                input.onButtonPressed(Button.AB, function () {
+                    displayingScore = true
+                    basic.showNumber(myScore)
+                    //basic.pause(500)
+                    displayingScore = false
+                })
+                */
     }
-    
+
     function actuateThumper(activityType: number) {
-        if (thumperType == 0) { 
+        if (thumperType == 0) {
             thumpPin = DigitalPin.P0
         } else {
             thumpPin = DigitalPin.P1
@@ -529,23 +530,23 @@ let selex=0 //
     . # . # .
     . # . # .
     `, 0)
-    if(!dualThumpMode){
-        pins.digitalWritePin(thumpPin, 1)
-        control.waitMicros(10000);
-        pins.digitalWritePin(thumpPin, 0)
-        control.waitMicros(10000);
-        pins.digitalWritePin(thumpPin, 1)
-        control.waitMicros(10000);
-        pins.digitalWritePin(thumpPin, 0)
-        control.waitMicros(10000);
-    } else {
-        pins.digitalWritePin(thumpBpin, 1)
-        control.waitMicros(10000);
-        pins.digitalWritePin(thumpBpin, 0)
-        control.waitMicros(10000);
- 
-    }
-        
+                if (!dualThumpMode) {
+                    pins.digitalWritePin(thumpPin, 1)
+                    control.waitMicros(10000);
+                    pins.digitalWritePin(thumpPin, 0)
+                    control.waitMicros(10000);
+                    pins.digitalWritePin(thumpPin, 1)
+                    control.waitMicros(10000);
+                    pins.digitalWritePin(thumpPin, 0)
+                    control.waitMicros(10000);
+                } else {
+                    pins.digitalWritePin(thumpBpin, 1)
+                    control.waitMicros(10000);
+                    pins.digitalWritePin(thumpBpin, 0)
+                    control.waitMicros(10000);
+
+                }
+
 
 
                 break;
@@ -570,7 +571,7 @@ let selex=0 //
             }
             case 3: {
                 let tempThumpPin = 0
-                if(!dualThumpMode){
+                if (!dualThumpMode) {
                     tempThumpPin = thumpPin
                 } else {
                     tempThumpPin = thumpBpin
@@ -596,11 +597,11 @@ let selex=0 //
     . # # # .
     . . # . .
     `, 0)
-    
+
                 pins.digitalWritePin(DigitalPin.P2, 1)
                 basic.pause(globalPinOnTime)
                 pins.digitalWritePin(DigitalPin.P2, 0)
-                basic.pause(globalPinOnTime)    
+                basic.pause(globalPinOnTime)
                 break;
             }
 
@@ -655,7 +656,8 @@ let selex=0 //
                     */
                 if (!displayingScore) {
                     if (allowThumping) {
-                        if(!dualThumpMode){led.plot(2, 4)
+                        if (!dualThumpMode) {
+                            led.plot(2, 4)
                         } else {
                             led.plot(1, 4)
                             led.plot(3, 4)
@@ -679,7 +681,7 @@ let selex=0 //
     //% blockId="MBORCH_groupedThumper" block="make a grouped thumper with the number $Number in the group $GroupName" weight=100
     export function makeAGroupedThumper(GroupName: string, Number: number): void {
         radio.setGroup(83)
-        
+
         radio.onReceivedValue(function (receivedName: string, value: number) {
             if (receivedName == "m") {
                 handleThumperMutes(value)
