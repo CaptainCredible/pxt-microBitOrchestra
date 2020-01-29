@@ -176,7 +176,7 @@ namespace OrchestraInstrument {
         InstrumentName = withName
 
         radio.onReceivedValue(function (receivedName: string, value: number) {
-            led.toggle(2, 2)
+            //led.toggle(2, 2)
             // here we need to distinguish between normal and Poly
             if (receivedName == InstrumentName) {
                 if (outputMode == 0) { // no automated trigger handling
@@ -239,6 +239,10 @@ namespace OrchestraInstrument {
         for (let i = 0; i <= 16; i++) {
             if (dataToHandle & (bitCheckMask << i)) {
                 noteToHandle = i
+                if (outputMode == 0) {
+                    control.raiseEvent(1337, i + 1) //we need to avoid zero, zero is catch all
+                }
+
                 handleInstrumentOutputMode(noteToHandle)
                 //serial.writeValue("handled", noteToHandle)
             }
