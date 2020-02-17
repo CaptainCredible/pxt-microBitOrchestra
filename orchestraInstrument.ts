@@ -500,6 +500,15 @@ namespace OrchestraInstrument {
     }
 
     function actuateThumper(activityType: number) {
+
+        if (dualThumpMode){
+            if(activityType == 2){
+                activityType = 1
+            } else if (activityType == 1) {
+                activityType = 2
+            }
+        }
+
         if (thumperType == 0) {
             thumpPin = DigitalPin.P0
         } else {
