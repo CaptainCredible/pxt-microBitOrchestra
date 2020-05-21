@@ -9,6 +9,7 @@
  * started improving waitforstep
  * fixed microbitHero!
 */
+let localSeqThumper = false
 let allowThumping = true
 let thumpPin = DigitalPin.P0
 let scoreIsLocked = false

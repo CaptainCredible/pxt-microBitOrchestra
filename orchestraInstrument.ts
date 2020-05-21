@@ -319,7 +319,13 @@ namespace OrchestraInstrument {
         }
     }
 
-
+	/**
+     * Registers code to run when the the sequencer triggers a local sound
+     */
+    //%block="when local sequencer triggers sound| %sound"
+    export function onSequencerTrigger(sound: number, body: () => void) {
+        control.onEvent(80085, sound, body);
+    }
 
 
 	/**
@@ -359,7 +365,7 @@ namespace OrchestraInstrument {
         }
     }
 
-    //% blockId="setupBunMode" block="slave this thumper to Bun group as number $bunNumber and use solenoid action $solAction"
+    //% blockId="setupBunMode" block="slave this thump:bit to Bun group as number $bunNumber action $solAction"
     //% solAction.defl=bunSolactions.auto
     //% advanced=true
     export function slaveToBun(bunNumber: number, solAction: bunSolactions) {
@@ -395,7 +401,7 @@ namespace OrchestraInstrument {
      * @param Name
      * @param Number
      */
-    //% blockId="MBORCH_Thumper" block="make a thumper $Type, with the name $Name"
+    //% blockId="MBORCH_Thumper" block="make a thump:bit $Type, with the name $Name"
     export function makeAThumper(Name: string, Type: thumperType): void {
         thumpBpin = DigitalPin.P2
         InstrumentName = Name
@@ -499,10 +505,16 @@ namespace OrchestraInstrument {
                 */
     }
 
+    //%block="actuate thump:bit| sound = %snd"
+    //%advanced=true
+    export function callActuateThumpBit(snd: number) {
+        actuateThumper(snd)
+    }
+
     function actuateThumper(activityType: number) {
 
-        if (dualThumpMode){
-            if(activityType == 2){
+        if (dualThumpMode) {
+            if (activityType == 2) {
                 activityType = 1
             } else if (activityType == 1) {
                 activityType = 2
@@ -521,13 +533,15 @@ namespace OrchestraInstrument {
 
         switch (activityType) {
             case 0: {
-                basic.showLeds(`
+                if (!redirectLocalHW) {
+                    basic.showLeds(`
     . . . . .
     . . . . .
     . . . . .
     # # # # #
     # # # # #
     `, 0)
+                }
                 pins.digitalWritePin(thumpPin, 1)
                 basic.pause(5)
                 pins.digitalWritePin(thumpPin, 0)
@@ -536,13 +550,16 @@ namespace OrchestraInstrument {
             }
 
             case 1: {
-                basic.showLeds(`
+                if (!redirectLocalHW) {
+                    basic.showLeds(`
     . # . # .
     . # . # .
     . # . # .
     . # . # .
     . # . # .
     `, 0)
+                }
+
                 if (!dualThumpMode) {
                     pins.digitalWritePin(thumpPin, 1)
                     control.waitMicros(10000);
@@ -567,13 +584,16 @@ namespace OrchestraInstrument {
 
             case 2: {
                 for (let i = 0; i < 7; i++) {
-                    basic.showLeds(`
+                    if (!redirectLocalHW) {
+                        basic.showLeds(`
     # . # . #
     # . # . #
     # . # . #
     # . # . #
     # . # . #
     `, 0)
+                    }
+
                     pins.digitalWritePin(thumpPin, 1)
                     control.waitMicros(5000)
                     led.toggleAll()
@@ -602,19 +622,20 @@ namespace OrchestraInstrument {
                 break;
             }
             case 4: {
-
-                basic.showLeds(`
+                if (!redirectLocalHW) {
+                    basic.showLeds(`
     . . # . .
     . # # # .
     # # # # #
     . # # # .
     . . # . .
     `, 0)
+                    pins.digitalWritePin(DigitalPin.P2, 1)
+                    basic.pause(globalPinOnTime)
+                    pins.digitalWritePin(DigitalPin.P2, 0)
+                    basic.pause(globalPinOnTime)
+                }
 
-                pins.digitalWritePin(DigitalPin.P2, 1)
-                basic.pause(globalPinOnTime)
-                pins.digitalWritePin(DigitalPin.P2, 0)
-                basic.pause(globalPinOnTime)
                 break;
             }
 
@@ -622,26 +643,29 @@ namespace OrchestraInstrument {
                 if (thumperType == 1) {
                     generateThumperTones(activityType);
                 } else {
-                    basic.showLeds(`
+                    if (!redirectLocalHW) {
+                        basic.showLeds(`
     . . . . .
     . . . . .
     . . . . .
     # # # # #
     # # # # #
     `, 0)
+                    }
                     pins.digitalWritePin(thumpPin, 1)
                     basic.pause(5)
                     pins.digitalWritePin(thumpPin, 0)
                     basic.pause(10)
-
                 }
-
                 break;
             }
         }
 
         pins.digitalWritePin(thumpPin, 0)
-        basic.clearScreen()
+        if (!redirectLocalHW) {
+            basic.clearScreen()
+        }
+
     }
 
     function pulseThumperNose() {
@@ -691,7 +715,7 @@ namespace OrchestraInstrument {
  * @param Number
  */
     //% block advanced=true
-    //% blockId="MBORCH_groupedThumper" block="make a grouped thumper with the number $Number in the group $GroupName" weight=100
+    //% blockId="MBORCH_groupedThumper" block="make a grouped thump:bit with the number $Number in the group $GroupName" weight=100
     export function makeAGroupedThumper(GroupName: string, Number: number): void {
         radio.setGroup(83)
 
@@ -721,6 +745,8 @@ namespace OrchestraInstrument {
         pulseThumperNose()
     }
 
+
+
     //%block="play bass drum through speaker.| length = %duration"
     //%duration.defl=200
     //%advanced=true
@@ -731,6 +757,7 @@ namespace OrchestraInstrument {
         }
         music.playTone(440, 1)
     }
+
 
     //%block="play snare drum through speaker.| length = %duration"
     //%duration.defl=200
@@ -743,15 +770,6 @@ namespace OrchestraInstrument {
         music.playTone(440, 1)
     }
 
-    /**
- * Registers code to run when button A is pushed
- */
-    //
-    //%block="when sequencer plays local sound $sound" weight=80
-    //%color=#D400D4 weight=70 //%sound.min=1 sound.max=128 sound.defl=1
-    export function onSequencerTrigger(sound: number, thing: Action) {
-        control.onEvent(80085, sound, thing);
-    }
 
 
 }

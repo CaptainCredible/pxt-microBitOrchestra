@@ -606,6 +606,7 @@ namespace OrchestraMusician {
 
 
 
+
     function sendTriggersOut() {  //read the buffer and send any notes that need to be sent
         if (polySend) {
             let scanLength = 4
