@@ -544,7 +544,7 @@ namespace OrchestraMusician {
                     }
 
                     if (redirectLocalHW) {
-                        control.raiseEvent(80085, channelOutNotes[channelSelect] + 1)
+                        control.raiseEvent(8008, channelOutNotes[channelSelect] + 1)
                     } else if (channelIsSetup[channelSelect] && microBitID != 9876) {   //check that we have set up this channel and that we have set a microbit ID
                         send(channelOutNotes[channelSelect], channelOutNames[channelSelect])
                     }
@@ -653,7 +653,7 @@ namespace OrchestraMusician {
     function localSendTriggersOut() {
         for (let m = 0; m < 4; m++) {
             if (triggerBuffer[m]) {
-                control.raiseEvent(80085, m + 1)
+                control.raiseEvent(8008, m + 1)
                 //basic.showNumber(m+1)
 
             }

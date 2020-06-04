@@ -323,8 +323,8 @@ namespace OrchestraInstrument {
      * Registers code to run when the the sequencer triggers a local sound
      */
     //%block="when local sequencer triggers sound| %sound"
-    export function onSequencerTrigger(sound: number, body: () => void) {
-        control.onEvent(80085, sound, body);
+    export function onSequencerTrigger(sound: number, thing: () => void) {
+        control.onEvent(8008, sound, thing);
     }
 
 
@@ -522,7 +522,7 @@ namespace OrchestraInstrument {
         }
 
         if (thumperType == 0) {
-            thumpPin = DigitalPin.P0
+            thumpPin = DigitalPin.P1
         } else {
             thumpPin = DigitalPin.P1
         }
@@ -596,7 +596,10 @@ namespace OrchestraInstrument {
 
                     pins.digitalWritePin(thumpPin, 1)
                     control.waitMicros(5000)
-                    led.toggleAll()
+                    if (!redirectLocalHW) {
+                        led.toggleAll()
+                    }
+
                     pins.digitalWritePin(thumpPin, 0)
                     control.waitMicros(6000)
                 }
@@ -610,10 +613,15 @@ namespace OrchestraInstrument {
                     tempThumpPin = thumpBpin
                 }
                 for (let i = 0; i <= 6 - 1; i++) {
-                    led.plotAll()
+                    if (!redirectLocalHW) {
+                        led.plotAll()
+                    }
+
                     pins.digitalWritePin(tempThumpPin, 1)
                     basic.pause(5)
-                    basic.clearScreen()
+                    if (!redirectLocalHW) {
+                        basic.clearScreen()
+                    }
                     //control.waitMicros(4000)
                     pins.digitalWritePin(tempThumpPin, 0)
                     basic.pause((i + 1) * 5)

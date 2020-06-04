@@ -123,7 +123,7 @@ if (pins.digitalReadPin(DigitalPin.P20)) {
 
 
 
-enum myTouchPins{
+enum myTouchPins {
     //%block="p0"
     p0 = 7,
     //%block="p1"
@@ -384,7 +384,7 @@ namespace OrchestraConductor {
     //% block advanced=true
     //% blockId="MBORCH-thumpOnOff" "turn thumps on or off"
     export function turnThump(onOff: onOff) {
-    OrchestraMusician.send(onOff, "thump")
+        OrchestraMusician.send(onOff, "thump")
     }
 
     /**
