@@ -146,10 +146,10 @@ enum timeSlotModes {
 }
 
 enum thumperType {
-    //%block="without speaker"
-    withoutSpeaker = 0,
-    //%block="with speaker"
-    withSpeaker = 1,
+    //%block="thump:bit"
+    thumpBit = 1,
+    //%block="legacyThumper"
+    pulsePin1and2 = 0,
 }
 
 enum internalExternal {

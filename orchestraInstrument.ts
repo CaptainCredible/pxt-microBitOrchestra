@@ -401,7 +401,7 @@ namespace OrchestraInstrument {
      * @param Name
      * @param Number
      */
-    //% blockId="MBORCH_Thumper" block="make a thump:bit $Type, with the name $Name"
+    //% blockId="MBORCH_Thumper" block="make a $Type rabbit, with the name $Name"
     export function makeAThumper(Name: string, Type: thumperType): void {
         thumpBpin = DigitalPin.P2
         InstrumentName = Name
