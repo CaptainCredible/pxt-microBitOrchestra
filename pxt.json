@@ -4,7 +4,8 @@
     "description": "",
     "dependencies": {
         "core": "*",
-        "radio": "*"
+        "radio": "*",
+        "microphone": "*"
     },
     "files": [
         "README.md",
@@ -17,6 +18,8 @@
         "test.ts"
     ],
     "public": false,
-    "installedVersion": "workspace:40b871e4-46a9-486e-6252-7da210c3012c",
+    "supportedTargets": [
+        "microbit"
+    ],
     "preferredEditor": "tsprj"
 }

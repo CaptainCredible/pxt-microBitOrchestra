@@ -386,9 +386,12 @@ namespace OrchestraInstrument {
                 generateThumperTones(num)
             }
 
-        } else if (num == myBunNumber + 1) {
+        }
+/* At one point i wanted them to respond to their number and the nomber above, that didn't work so great
+         else if (num == myBunNumber + 1) {
             actuateThumper(myBunAction + 1)
         }
+*/
     }
 
     let thumperType = 0
