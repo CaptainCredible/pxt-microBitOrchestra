@@ -122,13 +122,11 @@ namespace OrchestraMusician {
      */
     //%blockId="MBORCH_Hero" block="play micro:bit orchestra hero $Type" weight = 0 
     export function microbitOrchestraHero() {
-        led.toggleAll()
         gameActivated = true
         radio.setGroup(84)
         startMusicianGameTimers()
         
         radio.onReceivedString(function(name: string) {    
-            led.toggleAll()
             if (name == "A") {
                 scoreIsLocked = false
                 if (receivedPrematureA) {
