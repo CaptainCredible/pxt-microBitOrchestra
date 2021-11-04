@@ -410,7 +410,9 @@ namespace OrchestraMusician {
             while (true) {
                 shook = shake
                 shake = input.acceleration(Dimension.Y)
-                if ((shook - shake > shakeThresh) && (input.runningTime() - shakeTimer > shakeDebounce)) {
+                let shakeAmount = shook - shake
+                serial.writeValue("shakeshook", shakeAmount)
+                if ((shakeAmount > shakeThresh) && (input.runningTime() - shakeTimer > shakeDebounce)) {
                     shakeTimer = input.runningTime()
                     control.raiseEvent(1985, 10)
                 }
