@@ -1,7 +1,6 @@
-// Add your code here
-/**
- * Custom blocks
- */
+let thumperToneIsPlaying = false
+let thumperToneTurnOffTime = input.runningTime()
+let thumperToneDuration = 50
 //% weight=100 color=#01bc11 icon=""
 //%blockId="OrchestraInstrument" block="Orchestra Instruments"
 namespace OrchestraInstrument {
@@ -13,7 +12,8 @@ namespace OrchestraInstrument {
     export function setPinPulseDuration(duration: number) {
         globalPinOnTime = duration
     }
-
+ 
+ 
 
     //GAME//
 
@@ -396,7 +396,12 @@ namespace OrchestraInstrument {
 
     let thumperType = 0
     function generateThumperTones(tone: number) {
-        music.playTone(noteFreq[tone % 36], 20)
+        //CAUSES CRASHES!!!!
+        music.ringTone(noteFreq[tone % 36])
+        control.inBackground(function () {
+          basic.pause(50)
+          music.stopAllSounds()  
+        })
     }
 
     /**
@@ -414,17 +419,23 @@ namespace OrchestraInstrument {
         //}
         let selex = 0 //
         OrchestraMusician.onButtonAPressed(function () {
-            actuateThumper(selex)
+            //actuateThumper(selex)
+            if(!thumperIsMuted){
+                actuateThumper(0)
+            }
+            
         })
         OrchestraMusician.onButtonBPressed(function () {
-            selex++
-            if (selex > 4) selex = 0
+            //selex++
+            //if (selex > 4) selex = 0
+            if (!thumperIsMuted) {
+            actuateThumper(4)
+            }
         })
         input.onButtonPressed(Button.AB, function () {
             dualThumpMode = !dualThumpMode
             basic.clearScreen()
         })
-
 
         radio.setGroup(83)
 
@@ -652,7 +663,12 @@ namespace OrchestraInstrument {
 
             default: {
                 if (thumperType == 1) {
-                    generateThumperTones(activityType);
+                    //the old code played tones, has become unstable in V2
+                    //generateThumperTones(activityType);
+                    //the new code plays brrrp if the thumper has a myBunNumber greater than 5
+                    if(activityType == myBunNumber){
+                        actuateThumper(2)
+                    }
                 } else {
                     if (!redirectLocalHW) {
                         basic.showLeds(`
