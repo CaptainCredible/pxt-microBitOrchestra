@@ -1060,7 +1060,7 @@ namespace OrchestraMusician {
             } else if (msgID == "ma") { //mute all
                 handleMusicianMutes(1337, true) // this will mute all
             } else if (msgID == "uma") {//this will unmute all
-                handleMusicianSolos(1337)
+                handleMusicianMutes(1337, false)
             } else if (msgID == "mum") {//this will unmute one
                 handleMusicianMutes(receivedData, false)
             } else if (msgID == "win") {//Set the radiosend window duration
