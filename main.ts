@@ -46,7 +46,7 @@ let shakeTimer = 0
 let shake = 0
 let shook = 0
 let shakeDebounce = 100
-let shakeThresh = 4000
+
 let conductorPassword = 1983
 let enteredPassword = 0
 let replaceLastPolyWithThumper = false

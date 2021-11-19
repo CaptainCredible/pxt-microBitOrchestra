@@ -405,14 +405,15 @@ namespace OrchestraMusician {
 
     //%block="as soon as shaken" 
     //%color=#D400D4 weight=65
-    export function onShook(thing: () => void) {
+    export function onShook(shakeThresh: number, thing: () => void) {
+        //basic.showIcon(IconNames.Fabulous)
         control.inBackground(function () {
             while (true) {
                 shook = shake
                 shake = input.acceleration(Dimension.Y)
                 let shakeAmount = shook - shake
-                serial.writeValue("shakeshook", shakeAmount)
-                if ((shakeAmount > shakeThresh) && (input.runningTime() - shakeTimer > shakeDebounce)) {
+                if ((shakeAmount < -shakeThresh) && (input.runningTime() - shakeTimer > shakeDebounce)) {
+                    serial.writeValue("shakeshook", shakeAmount)
                     shakeTimer = input.runningTime()
                     control.raiseEvent(1985, 10)
                 }
