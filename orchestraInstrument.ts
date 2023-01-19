@@ -433,8 +433,8 @@ namespace OrchestraInstrument {
             }
         })
         input.onButtonPressed(Button.AB, function () {
-            dualThumpMode = !dualThumpMode
-            basic.clearScreen()
+            //dualThumpMode = !dualThumpMode
+            //basic.clearScreen()
         })
 
         radio.setGroup(83)
